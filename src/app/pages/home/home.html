@@ -1,0 +1,84 @@
+<app-header></app-header>
+
+<section class="hero">
+  <div class="hero-content">
+    <h1>
+      Bienvenue sur le <br />
+      <span>Portail Unique</span> <br />
+      Honey Group
+    </h1>
+
+    <p>
+      Découvrez l’ensemble de nos pôles d’activités <br />
+      au même endroit.
+    </p>
+
+    <div class="buttons">
+      <a href="#" class="btn-primary">Découvrir nos services</a>
+      <a href="#" class="btn-outline">À propos de nous</a>
+    </div>
+  </div>
+</section>
+
+<section class="activities">
+  <h2>Nos Pôles d’Activités</h2>
+
+  <div class="cards">
+
+    @for (pole of poles; track pole.id) {
+
+      <div class="card">
+
+        <img [src]="getImage(pole.nom)" [alt]="pole.nom">
+
+        <div class="icon">
+          {{ getIcon(pole.nom) }}
+        </div>
+
+        <div class="card-body">
+          <h3>{{ pole.nom }}</h3>
+          <p>{{ pole.description }}</p>
+          <a href="#">Découvrir ›</a>
+          <button  type="button" class="btn-devis">
+            Demander un devis
+          </button>
+
+        </div>
+
+      </div>
+
+    }
+
+  </div>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div>
+      <span>👥</span>
+      <strong>500+</strong>
+      <p>Clients satisfaits</p>
+    </div>
+
+    <div>
+      <span>💼</span>
+      <strong>50+</strong>
+      <p>Projets réalisés</p>
+    </div>
+
+    <div>
+      <span>🏆</span>
+      <strong>10+</strong>
+      <p>Années d’expérience</p>
+    </div>
+
+    <div>
+      <span>🌐</span>
+      <strong>4</strong>
+      <p>Pôles d’activités</p>
+    </div>
+  </div>
+
+</section>
+<app-footer></app-footer>
+
+

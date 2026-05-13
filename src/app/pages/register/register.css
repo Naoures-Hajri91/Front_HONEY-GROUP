@@ -1,0 +1,257 @@
+/* =========================
+   GLOBAL RESET
+========================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+body {
+  min-height: 100vh;
+  background: #f4f6f8;
+  overflow-x: hidden;
+}
+
+/* =========================
+   PAGE LAYOUT
+========================= */
+.register-page {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* =========================
+   LEFT SIDE
+========================= */
+.left-side {
+  flex: 1;
+  background:
+    linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)),
+    url('https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?q=80&w=1400');
+
+  background-size: cover;
+  background-position: center;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: white;
+  padding: 40px;
+}
+
+.overlay {
+  max-width: 420px;
+  text-align: left;
+}
+
+.overlay h1 {
+  font-size: 48px;
+  color: #f4b400;
+  margin-bottom: 20px;
+}
+
+.overlay p {
+  font-size: 18px;
+  line-height: 1.6;
+  opacity: 0.95;
+}
+
+/* =========================
+   RIGHT SIDE
+========================= */
+.right-side {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  padding: 30px;
+}
+
+/* =========================
+   CARD
+========================= */
+.register-card {
+  width: 100%;
+  max-width: 420px;
+}
+
+.register-card h2 {
+  font-size: 32px;
+  margin-bottom: 25px;
+  color: #333;
+  text-align: center;
+}
+
+/* =========================
+   FORM
+========================= */
+.form-row {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.form-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  margin-bottom: 6px;
+  font-size: 14px;
+  color: #555;
+}
+
+/* INPUT + SELECT */
+input,
+select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  outline: none;
+  transition: 0.3s;
+}
+
+input:focus,
+select:focus {
+  border-color: #f4b400;
+  box-shadow: 0 0 6px rgba(244, 180, 0, 0.3);
+}
+
+/* VALIDATION ANGULAR */
+input.ng-valid.ng-touched {
+  border-color: #2ecc71;
+  box-shadow: 0 0 4px rgba(46, 204, 113, 0.3);
+}
+
+input.ng-invalid.ng-touched {
+  border-color: #e74c3c;
+  box-shadow: 0 0 4px rgba(231, 76, 60, 0.3);
+}
+
+/* PHONE */
+.phone-wrapper {
+  display: flex;
+  gap: 10px;
+}
+
+.phone-wrapper select {
+  width: 40%;
+}
+
+.phone-wrapper input {
+  width: 60%;
+}
+
+/* ERROR TEXT */
+small {
+  color: #e74c3c;
+  font-size: 12px;
+  margin-top: 5px;
+  animation: shake 0.2s ease-in-out;
+}
+
+/* =========================
+   BUTTON
+========================= */
+button {
+  width: 100%;
+  padding: 13px;
+  border: none;
+  border-radius: 10px;
+  background: #f4b400;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+button:hover {
+  background: #d89c00;
+}
+
+button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+/* =========================
+   LOGIN LINK
+========================= */
+.login-link {
+  margin-top: 18px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.login-link a {
+  color: #f4b400;
+  text-decoration: none;
+}
+
+/* =========================
+   ANIMATION ERROR
+========================= */
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-3px); }
+  50% { transform: translateX(3px); }
+  75% { transform: translateX(-3px); }
+  100% { transform: translateX(0); }
+}
+
+/* =========================
+   RESPONSIVE MOBILE
+========================= */
+@media (max-width: 900px) {
+
+  .register-page {
+    flex-direction: column;
+  }
+
+  .left-side {
+    min-height: 220px;
+    padding: 20px;
+    text-align: center;
+  }
+
+  .overlay {
+    text-align: center;
+  }
+
+  .overlay h1 {
+    font-size: 28px;
+  }
+
+  .overlay p {
+    font-size: 14px;
+  }
+
+  .right-side {
+    padding: 20px;
+  }
+
+  .register-card {
+    max-width: 100%;
+  }
+
+  .form-row {
+    flex-direction: column;
+  }
+
+  .phone-wrapper {
+    flex-direction: column;
+  }
+
+  .phone-wrapper select,
+  .phone-wrapper input {
+    width: 100%;
+  }
+}

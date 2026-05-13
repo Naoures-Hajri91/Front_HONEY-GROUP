@@ -1,0 +1,165 @@
+<!-- ================= NAVBAR ================= -->
+
+<nav class="navbar navbar-expand-lg custom-navbar">
+
+  <div class="container">
+
+    <!-- LOGO -->
+    <a class="navbar-brand d-flex align-items-center" routerLink="/">
+
+      <img
+        [src]="logoPath"  width="100"
+        alt="logo"
+        class="logo-img"
+      />
+
+      <span class="brand-text">
+        Honey Group
+      </span>
+
+    </a>
+
+    <!-- MOBILE BUTTON -->
+
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarNav"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- MENU -->
+
+    <div class="collapse navbar-collapse" id="navbarNav">
+
+      <ul class="navbar-nav ms-auto align-items-lg-center">
+
+        <!-- ACCUEIL -->
+
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/">
+            Accueil
+          </a>
+        </li>
+
+        <!-- AGENCE -->
+
+        <li class="nav-item dropdown">
+
+          <a
+            class="nav-link dropdown-toggle"
+            href="#"
+            data-bs-toggle="dropdown"
+          >
+            Agence
+          </a>
+
+          <ul class="dropdown-menu">
+
+            <li>
+              <a class="dropdown-item" routerLink="/agency">
+                Qui sommes-nous
+              </a>
+            </li>
+
+          </ul>
+
+        </li>
+
+        <!-- NOS POLES -->
+
+        <li class="nav-item dropdown">
+
+          <a
+            class="nav-link dropdown-toggle"
+            href="#"
+            data-bs-toggle="dropdown"
+          >
+            Nos Pôles
+          </a>
+
+          <ul class="dropdown-menu">
+
+            <li>
+              <a class="dropdown-item" routerLink="/tourisme">
+                Tourisme
+              </a>
+            </li>
+
+            <li>
+              <a class="dropdown-item" routerLink="/it">
+                IT & Digital
+              </a>
+            </li>
+
+            <li>
+              <a class="dropdown-item" routerLink="/event">
+                Event
+              </a>
+            </li>
+
+            <li>
+              <a class="dropdown-item" routerLink="/formation">
+                Formation
+              </a>
+            </li>
+
+          </ul>
+
+        </li>
+
+        <!-- SERVICES -->
+
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/services">
+            Nos Services
+          </a>
+        </li>
+
+        <!-- TALENTS -->
+
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/talents">
+            Mur des Talents
+          </a>
+        </li>
+
+        <!-- PARTENARIATS -->
+
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/partenariats">
+            Partenariats
+          </a>
+        </li>
+
+        <!-- CONTACT -->
+
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/contact">
+            Contact
+          </a>
+        </li>
+
+        <!-- CONNEXION -->
+
+        <li class="nav-item ms-lg-3">
+
+          <a class="btn-login" routerLink="/login">
+
+            <i class="bi bi-person-circle me-2"></i>
+
+            Connexion
+
+          </a>
+
+        </li>
+
+      </ul>
+
+    </div>
+
+  </div>
+
+</nav>

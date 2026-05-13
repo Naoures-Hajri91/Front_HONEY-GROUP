@@ -1,0 +1,106 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* BODY */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f5f5f5;
+}
+
+/* CONTENU DEMO */
+.content {
+  min-height: 80vh;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.content h1 {
+  color: #0B1F3A;
+  margin-bottom: 20px;
+}
+
+.content p {
+  color: #555;
+  font-size: 18px;
+}
+
+/* FOOTER */
+.footer {
+  background-color: #0B1F3A; /* Bleu Marine */
+  color: white;
+
+  padding: 40px 20px;
+
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+/* CONTAINER */
+.footer-container {
+  max-width: 1100px;
+  margin: auto;
+  text-align: center;
+}
+
+/* PARAGRAPHES */
+.footer p {
+  margin-bottom: 12px;
+  font-size: 17px;
+  line-height: 1.7;
+}
+
+/* ICONS */
+.social-icons {
+  margin-top: 25px;
+
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+/* BOUTONS ICONS */
+.social-icons a {
+  width: 45px;
+  height: 45px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background-color: #F4B400; /* Jaune Miel */
+  color: #0B1F3A;
+
+  border-radius: 8px;
+
+  text-decoration: none;
+  font-size: 20px;
+
+  transition: 0.3s ease;
+}
+
+/* HOVER */
+.social-icons a:hover {
+  background-color: white;
+  transform: translateY(-3px);
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+
+  .footer p {
+    font-size: 15px;
+  }
+
+  .social-icons {
+    flex-wrap: wrap;
+  }
+
+  .social-icons a {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+  }
+}

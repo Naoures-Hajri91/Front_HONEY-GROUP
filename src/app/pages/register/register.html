@@ -1,0 +1,156 @@
+<div class="register-page">
+
+  <!-- LEFT -->
+  <div class="left-side">
+    <div class="overlay">
+      <h1>Honey Group</h1>
+      <p>
+        Rejoignez notre plateforme et créez votre compte
+        pour accéder à tous nos services.
+      </p>
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="right-side">
+
+    <div class="register-card">
+
+      <h2>Créer un compte</h2>
+
+      <form autocomplete="off" [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+
+        <!-- ROW 1 -->
+        <div class="form-row">
+
+          <div class="form-group">
+            <label>Nom</label>
+            <input type="text" placeholder="Nom" formControlName="nom">
+
+            @if (registerForm.get('nom')?.touched &&
+            registerForm.get('nom')?.hasError('required')) {
+              <small>Le nom est obligatoire</small>
+            }
+
+            @if (registerForm.get('nom')?.touched &&
+            registerForm.get('nom')?.hasError('pattern')) {
+              <small>Nom invalide</small>
+            }
+          </div>
+
+          <div class="form-group">
+            <label>Prénom</label>
+            <input type="text" placeholder="Prénom" formControlName="prenom">
+
+            @if (registerForm.get('prenom')?.touched &&
+            registerForm.get('prenom')?.hasError('required')) {
+              <small>Le prénom est obligatoire</small>
+            }
+
+            @if (registerForm.get('prenom')?.touched &&
+            registerForm.get('prenom')?.hasError('pattern')) {
+              <small>Prénom invalide</small>
+            }
+          </div>
+
+        </div>
+
+        <!-- ROW 2 -->
+        <div class="form-row">
+          <input type="text" name="fakeuser" style="display:none">
+          <input type="password" name="fakepass" style="display:none">
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" formControlName="email" placeholder="exemple@honeygroup.com" autocomplete="off">
+
+            @if (registerForm.get('email')?.touched &&
+            registerForm.get('email')?.hasError('required')) {
+              <small>Email obligatoire</small>
+            }
+
+            @if (registerForm.get('email')?.touched &&
+            registerForm.get('email')?.hasError('email')) {
+              <small>Format email invalide</small>
+            }
+          </div>
+
+          <div class="form-group">
+            <label>Mot de passe</label>
+            <input type="password" formControlName="password"placeholder="********" autocomplete="new-password">
+
+            @if (registerForm.get('password')?.touched &&
+            registerForm.get('password')?.hasError('required')) {
+              <small>Mot de passe obligatoire</small>
+            }
+
+            @if (registerForm.get('password')?.touched &&
+            registerForm.get('password')?.hasError('minlength')) {
+              <small>Minimum 8 caractères</small>
+            }
+          </div>
+
+        </div>
+
+        <!-- ROW 3 - TELEPHONE -->
+        <div class="form-row">
+
+          <div class="form-group phone-group">
+            <label>Téléphone</label>
+
+            <div class="phone-wrapper">
+
+              <select formControlName="countryCode">
+                <option value="+216">TN +216</option>
+                <option value="+33">FR +33</option>
+                <option value="+212">MA +212</option>
+                <option value="+213">DZ +213</option>
+              </select>
+
+              <input
+                type="text"
+                formControlName="telephone"
+                placeholder="Numéro"
+              >
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- ROW 4 -->
+        <div class="form-row">
+
+          <div class="form-group">
+            <label>Adresse</label>
+            <input type="text" placeholder="Adresse postale" formControlName="adresse">
+          </div>
+
+          <div class="form-group">
+            <label>Rôle</label>
+            <select formControlName="role">
+              <option value="USER">USER</option>
+              <option value="ADMIN">ADMIN</option>
+            </select>
+          </div>
+
+        </div>
+
+        <!-- BUTTON -->
+        <div class="form-row">
+
+          <div class="form-group full">
+            <button type="submit" [disabled]="registerForm.invalid">
+              S'inscrire
+            </button>
+          </div>
+
+        </div>
+
+      </form>
+
+    </div>
+
+  </div>
+
+</div>
