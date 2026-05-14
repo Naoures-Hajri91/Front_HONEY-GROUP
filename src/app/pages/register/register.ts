@@ -1,6 +1,9 @@
-import { Component } from '@angular/core';
+import {Component, inject} from '@angular/core';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {CommonModule} from '@angular/common';
+import { Router } from '@angular/router';
+import {Auth} from '../../services/auth';
+import {ToastrService} from 'ngx-toastr';
 @Component({
   selector: 'app-register',
   imports: [ ReactiveFormsModule,  CommonModule,],
@@ -8,49 +11,60 @@ import {CommonModule} from '@angular/common';
   styleUrl: './register.css',
 })
 export class Register {
-  registerForm: FormGroup;
+  private fb = inject(FormBuilder);
+  private authService = inject(Auth);
+  private router = inject(Router);
+  private toastr = inject(ToastrService);
 
+  errorMessage: string | null = null;
+  registerForm: FormGroup = this.fb.group({
 
-  constructor(private fb: FormBuilder) {
+    nom: ['', [
+      Validators.required,
+      Validators.pattern('^[A-Za-zÀ-ÖØ-öø-ÿ -]{2,100}$')
+    ]],
 
-    this.registerForm = this.fb.group({
+    prenom: ['', [
+      Validators.required,
+      Validators.pattern('^[A-Za-zÀ-ÖØ-öø-ÿ -]{2,100}$')
+    ]],
 
-      // USER
-      nom: ['', [
-        Validators.required,
-        Validators.pattern('^[A-Za-zÀ-ÖØ-öø-ÿ -]{2,100}$')
-      ]],
+    email: ['', [
+      Validators.required,
+      Validators.email
+    ]],
 
-      prenom: ['', [
-        Validators.required,
-        Validators.pattern('^[A-Za-zÀ-ÖØ-öø-ÿ -]{2,100}$')
-      ]],
+    countryCode: ['+33', [
+      Validators.required
+    ]],
 
-      email: ['', [
-        Validators.required,
-        Validators.email
-      ]],
+    telephone: ['', [
+      Validators.required,
+      Validators.pattern('^[0-9]{6,15}$')
+    ]],
 
-      password: ['', [
-        Validators.required,
-        Validators.minLength(8)
-      ]],
+    password: ['', [
+      Validators.required,
+      Validators.minLength(8)
+    ]],
 
-      role: ['USER', Validators.required],
+    adresse: ['', [
+      Validators.required,
+      Validators.minLength(5)
+    ]],
 
-      // PROFILE
-      telephone: [''],
-      countryCode: ['+33', Validators.required],
-      pays: [''],
-      adresse: ['']
+    pays: ['', [
+      Validators.required
+    ]],
 
-    });
+    preferences: ['']
 
-  }
+  });
 
   onSubmit(): void {
 
     if (this.registerForm.invalid) {
+      this.toastr.warning('Formulaire invalide ❌');
       this.registerForm.markAllAsTouched();
       return;
     }
@@ -61,22 +75,54 @@ export class Register {
       nom: form.nom,
       prenom: form.prenom,
       email: form.email,
+      telephone: `${form.countryCode}${form.telephone}`,
       password: form.password,
-      role: form.role,
-
-      profile: {
-        telephone: form.telephone,
-        pays: form.pays,
-        adresse: form.adresse
-      }
+      adresse: form.adresse,
+      pays: form.pays,
+      preferences: form.preferences
     };
 
-    console.log("REGISTER PAYLOAD 👉", payload);
+    this.authService.register(payload).subscribe({
 
-    // TODO: call API
-    // this.authService.register(payload).subscribe(...)
+      next: (res) => {
+
+        console.log("SUCCESS =>", res);
+
+        this.toastr.success(
+          'Compte créé avec succès 🎉',
+          'Succès'
+        );
+
+        this.router.navigate(['/login']);
+      },
+
+      error: (err: any) => {
+
+        console.log("FULL ERROR => ", err);
+        console.log("BACKEND RESPONSE => ", err.error);
+
+        const message =
+          err?.error?.message ||   // JSON backend
+          err?.error ||            // string backend
+          err?.message ||          // fallback Angular
+          "Erreur lors de l'inscription";
+
+        this.toastr.error(message, 'Erreur ❌');
+      }
+
+    });
   }
-  }
+
+  // GETTERS
+  get nom() { return this.registerForm.get('nom'); }
+  get prenom() { return this.registerForm.get('prenom'); }
+  get email() { return this.registerForm.get('email'); }
+  get telephone() { return this.registerForm.get('telephone'); }
+  get countryCode() { return this.registerForm.get('countryCode'); }
+  get password() { return this.registerForm.get('password'); }
+  get adresse() { return this.registerForm.get('adresse'); }
+  get pays() { return this.registerForm.get('pays'); }
+}
 
 
 

@@ -14,30 +14,54 @@
   <div class="right-side">
 
     <div class="login-card">
+
       <h2>Connexion</h2>
 
-      <form autocomplete="off">
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" autocomplete="off">
+
+        <!-- anti-autofill -->
         <input type="text" name="fakeuser" style="display:none">
         <input type="password" name="fakepass" style="display:none">
+
+        <!-- EMAIL -->
         <div class="input-group">
           <label>Email</label>
-          <input type="email" placeholder="exemple@honeygroup.com" autocomplete="off"  />
+          <input type="email"
+                 formControlName="email"
+                 placeholder="exemple@honeygroup.com"
+                 autocomplete="off">
+
+          @if (email?.touched && email?.invalid) {
+            <small>Email invalide</small>
+          }
         </div>
 
+        <!-- PASSWORD -->
         <div class="input-group">
           <label>Mot de passe</label>
-          <input type="password" placeholder="********" autocomplete="new-password" />
+          <input type="password"
+                 formControlName="password"
+                 placeholder="********"
+                 autocomplete="new-password">
+
+          @if (password?.touched && password?.invalid) {
+            <small>Mot de passe requis</small>
+          }
         </div>
 
+        <!-- BUTTON -->
+        <button type="submit" [disabled]="loginForm.invalid">
+          Se connecter
+        </button>
 
-
-        <button type="submit">Se connecter</button>
-
+        <!-- REGISTER LINK -->
         <p class="register">
           Nouveau chez Honey Group ?
           <a routerLink="/register">Créer un compte</a>
         </p>
+
       </form>
+
     </div>
 
   </div>
