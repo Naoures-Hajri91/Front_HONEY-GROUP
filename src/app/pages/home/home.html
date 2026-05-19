@@ -39,7 +39,7 @@
           <h3>{{ pole.nom }}</h3>
           <p>{{ pole.description }}</p>
           <a href="#">Découvrir ›</a>
-          <button  type="button" class="btn-devis">
+          <button  type="button" class="btn-devis"[routerLink]="['/devis', pole.nom]">
             Demander un devis
           </button>
 

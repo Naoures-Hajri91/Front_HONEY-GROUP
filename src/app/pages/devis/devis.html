@@ -1,0 +1,269 @@
+@if (form !== null) {
+
+  <div class="page">
+
+    <div class="glass-card">
+
+      <!-- HEADER -->
+      <div class="header">
+        <h1>Demande de devis</h1>
+        <p class="subtitle">{{ pole }}</p>
+      </div>
+
+      <form (ngSubmit)="submit()" class="form">
+
+        <!-- ================= USER ================= -->
+        <div class="grid-2">
+
+          <div class="input-box">
+            <label>Nom</label>
+            <input type="text" [(ngModel)]="form.nom" name="nom" [readonly]="userConnected">
+          </div>
+
+          <div class="input-box">
+            <label>Email</label>
+            <input type="email" [(ngModel)]="form.email" name="email" [readonly]="userConnected">
+          </div>
+
+        </div>
+
+        <!-- ================= TOURISME ================= -->
+        @if (pole.includes('tour') || pole.includes('eco')) {
+
+          <div class="section-title">✈️ Tourisme</div>
+
+          <div class="grid-2">
+
+            <div class="input-box">
+              <label>Circuit (auto)</label>
+              <input type="text"
+                     [(ngModel)]="form.circuit"
+                     name="circuit">
+            </div>
+
+            <div class="input-box">
+              <label>Date départ</label>
+              <input type="date" [(ngModel)]="form.dateDepart" name="dateDepart">
+            </div>
+
+            <div class="input-box">
+              <label>Adultes</label>
+              <input type="number" [(ngModel)]="form.adultes" name="adultes">
+            </div>
+
+            <div class="input-box">
+              <label>Enfants</label>
+              <input type="number" [(ngModel)]="form.enfants" name="enfants">
+            </div>
+
+          </div>
+
+          <div class="input-box">
+            <label>Confort</label>
+            <select [(ngModel)]="form.confort" name="confort">
+              <option>Standard</option>
+              <option>Luxe</option>
+            </select>
+          </div>
+
+          <div class="input-box">
+            <label>Notes</label>
+            <textarea [(ngModel)]="form.notes" name="notes"></textarea>
+          </div>
+
+        }
+
+        <!-- ================= IT ================= -->
+        @if (pole.includes('it') || pole.includes('digital')) {
+
+          <div class="section-title">💻 IT & Digital</div>
+
+          <div class="grid-2">
+
+            <div class="input-box">
+              <label>Type projet</label>
+              <select [(ngModel)]="form.typeProjet" name="typeProjet">
+                <option>Site Web</option>
+                <option>Application Mobile</option>
+                <option>Cloud</option>
+                <option>Maintenance</option>
+              </select>
+            </div>
+
+            <div class="input-box">
+              <label>Urgence</label>
+              <select [(ngModel)]="form.urgence" name="urgence">
+                <option>Dès que possible</option>
+                <option>Sous 3 mois</option>
+              </select>
+            </div>
+
+          </div>
+
+          <div class="input-box">
+            <label>Cahier des charges</label>
+            <textarea [(ngModel)]="form.cahierCharges" name="cahierCharges"></textarea>
+          </div>
+
+          <!-- ================= NAMECHEAP PRO SECTION ================= -->
+
+          <div class="partner-banner">
+
+            <div class="partner-badge">
+              ⭐ Partenaire officiel
+            </div>
+
+            <div class="partner-header">
+
+              <div class="logo-wrapper">
+                <img src="assets/images/namecheap.png" alt="Namecheap">
+              </div>
+
+              <div class="partner-text">
+                <h2>Domaines & Hébergement Web</h2>
+                <p>
+                  Lancez votre projet en ligne avec une infrastructure professionnelle sécurisée.
+                </p>
+              </div>
+
+            </div>
+
+            <div class="partner-grid">
+
+              <!-- DOMAIN -->
+              <div class="partner-card">
+
+                <h3>🌐 Nom de domaine</h3>
+
+                <p class="desc">
+                  Réservez votre identité digitale (rapide & sécurisé)
+                </p>
+
+                <select [(ngModel)]="form.domaine" name="domaine">
+                  <option value="">Choisir une extension</option>
+                  <option>.com</option>
+                  <option>.net</option>
+                  <option>.org</option>
+                  <option>.io</option>
+                </select>
+
+                <a class="cta"
+                   href="https://namecheap.pxf.io/YVN25R"
+                   target="_blank">
+                  🔥 Réserver un domaine
+                </a>
+
+              </div>
+
+              <!-- HOSTING -->
+              <div class="partner-card">
+
+                <h3>🚀 Hébergement Web</h3>
+
+                <p class="desc">
+                  Performance, sécurité et disponibilité 24/7
+                </p>
+
+                <select [(ngModel)]="form.hebergement" name="hebergement">
+                  <option value="">Choisir une offre</option>
+                  <option>Shared Hosting</option>
+                  <option>VPS</option>
+                  <option>Dedicated Server</option>
+                </select>
+
+                <a class="cta"
+                   href="https://namecheap.pxf.io/YVN25R"
+                   target="_blank">
+                  ⚡ Voir les offres
+                </a>
+
+              </div>
+
+            </div>
+
+          </div>
+        }
+
+        <!-- ================= FORMATION ================= -->
+        @if (pole.includes('forma')) {
+
+          <div class="section-title">📚 Formation</div>
+
+          <div class="grid-2">
+
+            <div class="input-box">
+              <label>Langue</label>
+              <select [(ngModel)]="form.langue" name="langue">
+                <option>Français</option>
+                <option>Anglais</option>
+                <option>Espagnol</option>
+                <option>Mandarin</option>
+              </select>
+            </div>
+
+            <div class="input-box">
+              <label>Niveau</label>
+              <select [(ngModel)]="form.niveau" name="niveau">
+                <option>Débutant</option>
+                <option>Intermédiaire</option>
+                <option>Avancé</option>
+              </select>
+            </div>
+
+          </div>
+
+          <div class="input-box">
+            <label>Créneaux</label>
+            <select [(ngModel)]="form.creneaux" name="creneaux">
+              <option>Matin</option>
+              <option>Après-midi</option>
+              <option>Soir</option>
+              <option>Samedi</option>
+            </select>
+          </div>
+
+        }
+
+        <!-- ================= EVENT (FIXED) ================= -->
+        @if (pole === 'event' || pole === 'evenementiel') {
+
+          <div class="section-title">🎉 Événementiel</div>
+
+          <div class="grid-2">
+
+            <div class="input-box">
+              <label>Type événement</label>
+              <select [(ngModel)]="form.typeEvent" name="typeEvent">
+                <option>Mariage</option>
+                <option>Séminaire</option>
+                <option>Conférence</option>
+                <option>Anniversaire</option>
+              </select>
+            </div>
+
+            <div class="input-box">
+              <label>Nombre invités</label>
+              <input type="number" [(ngModel)]="form.volume" name="volume">
+            </div>
+
+          </div>
+
+          <div class="input-box">
+            <label>Lieu</label>
+            <input type="text" [(ngModel)]="form.lieu" name="lieu">
+          </div>
+
+        }
+
+        <!-- BUTTON -->
+        <button type="submit" class="btn">
+          Envoyer la demande 🚀
+        </button>
+
+      </form>
+
+    </div>
+
+  </div>
+
+}
