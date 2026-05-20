@@ -8,6 +8,7 @@ import {
 import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Auth } from '../../services/auth';
+import { DevisService } from '../../services/devis-service';
 
 @Component({
   selector: 'app-devis',
@@ -20,26 +21,50 @@ export class Devis implements OnInit {
 
   private route = inject(ActivatedRoute);
   private userService = inject(Auth);
+  private devisService = inject(DevisService);
   private cdr = inject(ChangeDetectorRef);
 
   pole: string = '';
   userConnected = false;
+
+  currentUser: any = null;
+  currentUserId: number | null = null;
 
   form: any = {
     nom: '',
     email: '',
     pole: '',
 
-    // 🔥 AJOUT NAMECHEAP (IT)
+    // TOURISME
+    circuit: '',
+    dateDepart: '',
+    adultes: '',
+    enfants: '',
+    confort: '',
+    notes: '',
+
+    // IT
+    typeProjet: '',
+    urgence: '',
+    cahierCharges: '',
     domaine: '',
-    hebergement: ''
+    hebergement: '',
+
+    // FORMATION
+    langue: '',
+    niveau: '',
+    creneaux: '',
+
+    // EVENT
+    typeEvent: '',
+    lieu: '',
+    volume: ''
   };
 
   ngOnInit(): void {
 
     this.route.paramMap.subscribe(params => {
 
-      // 🔥 NORMALISATION ULTRA IMPORTANTE
       const rawPole = params.get('pole') || '';
 
       this.pole = rawPole
@@ -47,43 +72,34 @@ export class Devis implements OnInit {
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "");
 
-      console.log("RAW POLE =>", rawPole);
-      console.log("FINAL POLE =>", this.pole);
-
       this.userConnected = this.userService.isAuthenticated();
-
       this.form.pole = this.pole;
 
       // ================= USER =================
       if (this.userConnected) {
 
         this.userService.getCurrentUser().subscribe({
-
           next: (user: any) => {
 
-            console.log('USER =>', user);
+            this.currentUser = user;
+            this.currentUserId = user?.id || null;
 
             this.form.nom = user?.nom || '';
             this.form.email = user?.email || '';
 
             this.cdr.detectChanges();
           },
-
-          error: (err) => {
-
-            console.log('ERROR USER =>', err);
-
+          error: () => {
+            this.currentUser = null;
+            this.currentUserId = null;
             this.form.nom = '';
             this.form.email = '';
-
             this.cdr.detectChanges();
           }
-
         });
 
       }
 
-      // ================= FIELDS =================
       this.initFields();
       this.setAutoValues();
 
@@ -91,23 +107,19 @@ export class Devis implements OnInit {
 
   }
 
-  // 🔥 AUTO FILL selon pôle
+  // ================= AUTO =================
   setAutoValues(): void {
-
     if (this.pole.includes('tour')) {
-
       this.form.circuit = 'Nosy Be';
     }
   }
 
-  // ================= FORM DYNAMIQUE =================
+  // ================= INIT FIELDS =================
   initFields(): void {
 
     const p = this.pole;
 
-    // ===== TOURISME =====
     if (p === 'tourisme' || p === 'eco') {
-
       this.form.circuit = '';
       this.form.dateDepart = '';
       this.form.adultes = 1;
@@ -116,38 +128,133 @@ export class Devis implements OnInit {
       this.form.notes = '';
     }
 
-    // ===== IT =====
     else if (p === 'it' || p === 'digital') {
-
       this.form.typeProjet = '';
       this.form.urgence = '';
       this.form.cahierCharges = '';
-
-      // 🔥 NAMECHEAP FIELDS
       this.form.domaine = '';
       this.form.hebergement = '';
     }
 
-    // ===== FORMATION =====
     else if (p === 'formation') {
-
       this.form.langue = '';
       this.form.niveau = '';
       this.form.creneaux = '';
     }
 
-    // ===== EVENT =====
     else if (p === 'event' || p === 'evenementiel') {
-
       this.form.typeEvent = '';
       this.form.lieu = '';
       this.form.volume = 0;
     }
   }
 
-  // ================= SUBMIT =================
-  submit(): void {
-    console.log('DEMANDE DEVIS =>', this.form);
+  // ================= POLE ID =================
+  getPoleId(): number {
+
+    switch (this.pole) {
+
+      case 'it':
+      case 'digital':
+      case 'it & digital':
+        return 1;
+
+      case 'eco':
+      case 'ecotourisme':
+      case 'tourisme':
+        return 2;
+
+      case 'event':
+      case 'evenementiel':
+        return 3;
+
+      case 'formation':
+        return 4;
+
+      default:
+        return 0;
+    }
   }
 
+  // ================= SUBMIT =================
+  /*submit(): void {
+
+    const specificDetails: any = {};
+
+    Object.keys(this.form)
+      .filter(key =>
+        this.form[key] !== null &&
+        this.form[key] !== '' &&
+        key !== 'nom' &&
+        key !== 'email' &&
+        key !== 'pole'
+      )
+      .forEach(key => {
+        specificDetails[key] = String(this.form[key]);
+      });
+
+    const payload = {
+      nom: this.form.nom,
+      email: this.form.email,
+      userId: this.currentUserId,   // ✅ FIX IMPORTANT
+      poleId: this.getPoleId(),
+      source: 'Website',
+      specificDetails: specificDetails
+    };
+
+    console.log("🚀 PAYLOAD FINAL =>", payload);
+
+    this.devisService.envoyerDevis(payload).subscribe({
+      next: (res) => {
+        console.log("✅ SUCCESS =>", res);
+        alert("Devis envoyé avec succès 🚀");
+      },
+      error: (err) => {
+        console.log("❌ ERROR =>", err);
+        alert("Erreur lors de l’envoi");
+      }
+    });
+  }*/
+  submit(): void {
+
+    const specificDetails: any = {};
+
+    Object.keys(this.form)
+      .filter(key =>
+        this.form[key] !== null &&
+        this.form[key] !== '' &&
+        key !== 'nom' &&
+        key !== 'email' &&
+        key !== 'pole'
+      )
+      .forEach(key => {
+        specificDetails[key] = String(this.form[key]);
+      });
+
+    const payload = {
+      userId: this.currentUser?.id || null,
+
+      // 👤 guest only
+      nom: this.currentUser ? null : this.form.nom,
+      email: this.currentUser ? null : this.form.email,
+
+      poleId: this.getPoleId(),
+      source: 'Website',
+
+      specificDetails
+    };
+
+    console.log("🚀 PAYLOAD FINAL =>", payload);
+
+    this.devisService.envoyerDevis(payload).subscribe({
+      next: (res) => {
+        console.log("SUCCESS", res);
+        alert("Devis envoyé 🚀");
+      },
+      error: (err) => {
+        console.error("ERROR", err);
+        alert("Erreur envoi devis ❌");
+      }
+    });
+  }
 }
