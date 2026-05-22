@@ -2,7 +2,7 @@ import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { Header } from '../header/header';
 import { Footer } from '../footer/footer';
 import { Poles } from '../../services/poles';
-import {RouterLink} from '@angular/router';
+import {Router, RouterLink} from '@angular/router';
 
 @Component({
   selector: 'app-home',
@@ -19,7 +19,7 @@ export class Home implements OnInit {
 
   private poleService = inject(Poles);
   private cd = inject(ChangeDetectorRef);
-
+  private router = inject(Router);
   poles: any[] = [];
 
   ngOnInit(): void {
@@ -70,5 +70,49 @@ export class Home implements OnInit {
 
       default: return '⭐';
     }
+  }
+
+  openPole(poleName: string): void {
+
+    const p = poleName
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+
+    // 🌴 TOURISME
+    if (p.includes('tour') || p.includes('eco')) {
+
+      window.open(
+        'https://www.honeygroupmadatourism.com/',
+        '_blank'
+      );
+
+      return;
+    }
+
+    // 💻 IT
+    if (p.includes('it') || p.includes('digital')) {
+
+      window.open(
+        'https://www.honeygroupitmada.com/',
+        '_blank'
+      );
+
+      return;
+    }
+
+    // 🎉 EVENT
+    if (p.includes('event') || p.includes('evenementiel')) {
+
+      window.open(
+        'https://honeygroup-mg.vercel.app/',
+        '_blank'
+      );
+
+      return;
+    }
+
+    // 📚 FORMATION
+    this.router.navigate(['/devis', poleName]);
   }
 }

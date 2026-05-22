@@ -9,6 +9,7 @@ import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Auth } from '../../services/auth';
 import { DevisService } from '../../services/devis-service';
+import {ToastrService} from 'ngx-toastr';
 
 @Component({
   selector: 'app-devis',
@@ -23,6 +24,7 @@ export class Devis implements OnInit {
   private userService = inject(Auth);
   private devisService = inject(DevisService);
   private cdr = inject(ChangeDetectorRef);
+  private toastr= inject(ToastrService);
 
   pole: string = '';
   userConnected = false;
@@ -249,11 +251,20 @@ export class Devis implements OnInit {
     this.devisService.envoyerDevis(payload).subscribe({
       next: (res) => {
         console.log("SUCCESS", res);
-        alert("Devis envoyé 🚀");
+
+        this.toastr.success(
+          'Votre devis a été envoyé avec succès 🚀',
+          'Succès'
+        );
       },
+
       error: (err) => {
         console.error("ERROR", err);
-        alert("Erreur envoi devis ❌");
+
+        this.toastr.error(
+          'Erreur lors de l’envoi du devis ❌',
+          'Erreur'
+        );
       }
     });
   }

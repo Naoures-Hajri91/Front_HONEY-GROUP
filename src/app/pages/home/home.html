@@ -38,7 +38,12 @@
         <div class="card-body">
           <h3>{{ pole.nom }}</h3>
           <p>{{ pole.description }}</p>
-          <a href="#">Découvrir ›</a>
+          <a
+            href="javascript:void(0)"
+            (click)="openPole(pole.nom)"
+          >
+            Découvrir ›
+          </a>
           <button  type="button" class="btn-devis"[routerLink]="['/devis', pole.nom]">
             Demander un devis
           </button>

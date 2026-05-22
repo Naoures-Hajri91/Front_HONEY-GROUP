@@ -10,19 +10,50 @@
         <p class="subtitle">{{ pole }}</p>
       </div>
 
-      <form (ngSubmit)="submit()" class="form">
+      <form
+        (ngSubmit)="submit()"
+        class="form"
+        #devisForm="ngForm"
+      >
 
         <!-- ================= USER ================= -->
         <div class="grid-2">
 
           <div class="input-box">
             <label>Nom</label>
-            <input type="text" [(ngModel)]="form.nom" name="nom" [readonly]="userConnected">
+
+            <input
+              type="text"
+              [(ngModel)]="form.nom"
+              name="nom"
+              [readonly]="userConnected"
+              required
+              #nom="ngModel"
+            >
+
+            @if(nom.invalid && nom.touched){
+              <small class="error">Nom obligatoire</small>
+            }
+
           </div>
 
           <div class="input-box">
+
             <label>Email</label>
-            <input type="email" [(ngModel)]="form.email" name="email" [readonly]="userConnected">
+
+            <input
+              type="email"
+              [(ngModel)]="form.email"
+              name="email"
+              [readonly]="userConnected"
+              required
+              #email="ngModel"
+            >
+
+            @if(email.invalid && email.touched){
+              <small class="error">Email obligatoire</small>
+            }
+
           </div>
 
         </div>
@@ -35,35 +66,94 @@
           <div class="grid-2">
 
             <div class="input-box">
-              <label>Circuit (auto)</label>
-              <input type="text"
-                     [(ngModel)]="form.circuit"
-                     name="circuit">
+
+              <label>Circuit</label>
+
+              <input
+                type="text"
+                [(ngModel)]="form.circuit"
+                name="circuit"
+                required
+                #circuit="ngModel"
+              >
+
+              @if(circuit.invalid && circuit.touched){
+                <small class="error">Circuit obligatoire</small>
+              }
+
             </div>
 
             <div class="input-box">
+
               <label>Date départ</label>
-              <input type="date" [(ngModel)]="form.dateDepart" name="dateDepart">
+
+              <input
+                type="date"
+                [(ngModel)]="form.dateDepart"
+                name="dateDepart"
+                required
+                #dateDepart="ngModel"
+              >
+
+              @if(dateDepart.invalid && dateDepart.touched){
+                <small class="error">Date obligatoire</small>
+              }
+
             </div>
 
             <div class="input-box">
+
               <label>Adultes</label>
-              <input type="number" [(ngModel)]="form.adultes" name="adultes">
+
+              <input
+                type="number"
+                [(ngModel)]="form.adultes"
+                name="adultes"
+                required
+                min="1"
+                #adultes="ngModel"
+              >
+
+              @if(adultes.invalid && adultes.touched){
+                <small class="error">Champ obligatoire</small>
+              }
+
             </div>
 
             <div class="input-box">
+
               <label>Enfants</label>
-              <input type="number" [(ngModel)]="form.enfants" name="enfants">
+
+              <input
+                type="number"
+                [(ngModel)]="form.enfants"
+                name="enfants"
+                min="0"
+              >
+
             </div>
 
           </div>
 
           <div class="input-box">
+
             <label>Confort</label>
-            <select [(ngModel)]="form.confort" name="confort">
+
+            <select
+              [(ngModel)]="form.confort"
+              name="confort"
+              required
+              #confort="ngModel"
+            >
+              <option value="">Choisir</option>
               <option>Standard</option>
               <option>Luxe</option>
             </select>
+
+            @if(confort.invalid && confort.touched){
+              <small class="error">Confort obligatoire</small>
+            }
+
           </div>
 
           <div class="input-box">
@@ -81,31 +171,69 @@
           <div class="grid-2">
 
             <div class="input-box">
+
               <label>Type projet</label>
-              <select [(ngModel)]="form.typeProjet" name="typeProjet">
+
+              <select
+                [(ngModel)]="form.typeProjet"
+                name="typeProjet"
+                required
+                #typeProjet="ngModel"
+              >
+                <option value="">Choisir</option>
                 <option>Site Web</option>
                 <option>Application Mobile</option>
                 <option>Cloud</option>
                 <option>Maintenance</option>
               </select>
+
+              @if(typeProjet.invalid && typeProjet.touched){
+                <small class="error">Champ obligatoire</small>
+              }
+
             </div>
 
             <div class="input-box">
+
               <label>Urgence</label>
-              <select [(ngModel)]="form.urgence" name="urgence">
+
+              <select
+                [(ngModel)]="form.urgence"
+                name="urgence"
+                required
+                #urgence="ngModel"
+              >
+                <option value="">Choisir</option>
                 <option>Dès que possible</option>
                 <option>Sous 3 mois</option>
               </select>
+
+              @if(urgence.invalid && urgence.touched){
+                <small class="error">Champ obligatoire</small>
+              }
+
             </div>
 
           </div>
 
           <div class="input-box">
+
             <label>Cahier des charges</label>
-            <textarea [(ngModel)]="form.cahierCharges" name="cahierCharges"></textarea>
+
+            <textarea
+              [(ngModel)]="form.cahierCharges"
+              name="cahierCharges"
+              required
+              #cahierCharges="ngModel"
+            ></textarea>
+
+            @if(cahierCharges.invalid && cahierCharges.touched){
+              <small class="error">Champ obligatoire</small>
+            }
+
           </div>
 
-          <!-- ================= NAMECHEAP PRO SECTION ================= -->
+          <!-- ================= NAMECHEAP ================= -->
 
           <div class="partner-banner">
 
@@ -121,6 +249,7 @@
 
               <div class="partner-text">
                 <h2>Domaines & Hébergement Web</h2>
+
                 <p>
                   Lancez votre projet en ligne avec une infrastructure professionnelle sécurisée.
                 </p>
@@ -136,10 +265,15 @@
                 <h3>🌐 Nom de domaine</h3>
 
                 <p class="desc">
-                  Réservez votre identité digitale (rapide & sécurisé)
+                  Réservez votre identité digitale
                 </p>
 
-                <select [(ngModel)]="form.domaine" name="domaine">
+                <select
+                  [(ngModel)]="form.domaine"
+                  name="domaine"
+                  required
+                  #domaine="ngModel"
+                >
                   <option value="">Choisir une extension</option>
                   <option>.com</option>
                   <option>.net</option>
@@ -147,11 +281,9 @@
                   <option>.io</option>
                 </select>
 
-                <a class="cta"
-                   href="https://namecheap.pxf.io/YVN25R"
-                   target="_blank">
-                  🔥 Réserver un domaine
-                </a>
+                @if(domaine.invalid && domaine.touched){
+                  <small class="error">Champ obligatoire</small>
+                }
 
               </div>
 
@@ -164,24 +296,28 @@
                   Performance, sécurité et disponibilité 24/7
                 </p>
 
-                <select [(ngModel)]="form.hebergement" name="hebergement">
+                <select
+                  [(ngModel)]="form.hebergement"
+                  name="hebergement"
+                  required
+                  #hebergement="ngModel"
+                >
                   <option value="">Choisir une offre</option>
                   <option>Shared Hosting</option>
                   <option>VPS</option>
                   <option>Dedicated Server</option>
                 </select>
 
-                <a class="cta"
-                   href="https://namecheap.pxf.io/YVN25R"
-                   target="_blank">
-                  ⚡ Voir les offres
-                </a>
+                @if(hebergement.invalid && hebergement.touched){
+                  <small class="error">Champ obligatoire</small>
+                }
 
               </div>
 
             </div>
 
           </div>
+
         }
 
         <!-- ================= FORMATION ================= -->
@@ -192,39 +328,78 @@
           <div class="grid-2">
 
             <div class="input-box">
+
               <label>Langue</label>
-              <select [(ngModel)]="form.langue" name="langue">
+
+              <select
+                [(ngModel)]="form.langue"
+                name="langue"
+                required
+                #langue="ngModel"
+              >
+                <option value="">Choisir</option>
                 <option>Français</option>
                 <option>Anglais</option>
                 <option>Espagnol</option>
                 <option>Mandarin</option>
               </select>
+
+              @if(langue.invalid && langue.touched){
+                <small class="error">Champ obligatoire</small>
+              }
+
             </div>
 
             <div class="input-box">
+
               <label>Niveau</label>
-              <select [(ngModel)]="form.niveau" name="niveau">
+
+              <select
+                [(ngModel)]="form.niveau"
+                name="niveau"
+                required
+                #niveau="ngModel"
+              >
+                <option value="">Choisir</option>
                 <option>Débutant</option>
                 <option>Intermédiaire</option>
                 <option>Avancé</option>
               </select>
+
+              @if(niveau.invalid && niveau.touched){
+                <small class="error">Champ obligatoire</small>
+              }
+
             </div>
 
           </div>
 
           <div class="input-box">
+
             <label>Créneaux</label>
-            <select [(ngModel)]="form.creneaux" name="creneaux">
+
+            <select
+              [(ngModel)]="form.creneaux"
+              name="creneaux"
+              required
+              #creneaux="ngModel"
+            >
+              <option value="">Choisir</option>
               <option>Matin</option>
               <option>Après-midi</option>
               <option>Soir</option>
               <option>Samedi</option>
             </select>
+
+            @if(creneaux.invalid && creneaux.touched){
+              <small class="error">Champ obligatoire</small>
+            }
+
           </div>
 
         }
 
-        <!-- ================= EVENT (FIXED) ================= -->
+        <!-- ================= EVENT ================= -->
         @if (pole === 'event' || pole === 'evenementiel') {
 
           <div class="section-title">🎉 Événementiel</div>
@@ -232,31 +407,75 @@
           <div class="grid-2">
 
             <div class="input-box">
+
               <label>Type événement</label>
-              <select [(ngModel)]="form.typeEvent" name="typeEvent">
+
+              <select
+                [(ngModel)]="form.typeEvent"
+                name="typeEvent"
+                required
+                #typeEvent="ngModel"
+              >
+                <option value="">Choisir</option>
                 <option>Mariage</option>
                 <option>Séminaire</option>
                 <option>Conférence</option>
                 <option>Anniversaire</option>
               </select>
+
+              @if(typeEvent.invalid && typeEvent.touched){
+                <small class="error">Champ obligatoire</small>
+              }
+
             </div>
 
             <div class="input-box">
+
               <label>Nombre invités</label>
-              <input type="number" [(ngModel)]="form.volume" name="volume">
+
+              <input
+                type="number"
+                [(ngModel)]="form.volume"
+                name="volume"
+                required
+                min="1"
+                #volume="ngModel"
+              >
+
+              @if(volume.invalid && volume.touched){
+                <small class="error">Champ obligatoire</small>
+              }
+
             </div>
 
           </div>
 
           <div class="input-box">
+
             <label>Lieu</label>
-            <input type="text" [(ngModel)]="form.lieu" name="lieu">
+
+            <input
+              type="text"
+              [(ngModel)]="form.lieu"
+              name="lieu"
+              required
+              #lieu="ngModel"
+            >
+
+            @if(lieu.invalid && lieu.touched){
+              <small class="error">Lieu obligatoire</small>
+            }
+
           </div>
 
         }
 
         <!-- BUTTON -->
-        <button type="submit" class="btn">
+        <button
+          type="submit"
+          class="btn"
+          [disabled]="devisForm.invalid"
+        >
           Envoyer la demande 🚀
         </button>
 
