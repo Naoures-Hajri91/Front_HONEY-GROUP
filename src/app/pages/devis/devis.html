@@ -28,6 +28,7 @@
               [(ngModel)]="form.nom"
               name="nom"
               [readonly]="userConnected"
+              [placeholder]="userConnected ? '' : 'Votre nom'"
               required
               #nom="ngModel"
             >
@@ -47,6 +48,7 @@
               [(ngModel)]="form.email"
               name="email"
               [readonly]="userConnected"
+              [placeholder]="userConnected ? '' : 'Votre email'"
               required
               #email="ngModel"
             >

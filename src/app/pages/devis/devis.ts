@@ -5,13 +5,13 @@ import {
   ChangeDetectorRef
 } from '@angular/core';
 
-import {ActivatedRoute, Router} from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Auth } from '../../services/auth';
 import { DevisService } from '../../services/devis-service';
-import {ToastrService} from 'ngx-toastr';
-import {Header} from '../header/header';
-import {Footer} from '../footer/footer';
+import { ToastrService } from 'ngx-toastr';
+import { Header } from '../header/header';
+import { Footer } from '../footer/footer';
 
 @Component({
   selector: 'app-devis',
@@ -26,7 +26,7 @@ export class Devis implements OnInit {
   private userService = inject(Auth);
   private devisService = inject(DevisService);
   private cdr = inject(ChangeDetectorRef);
-  private toastr= inject(ToastrService);
+  private toastr = inject(ToastrService);
   private router = inject(Router);
 
   pole: string = '';
@@ -77,8 +77,9 @@ export class Devis implements OnInit {
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "");
 
-      this.userConnected = this.userService.isAuthenticated();
       this.form.pole = this.pole;
+
+      this.userConnected = this.userService.isAuthenticated();
 
       // ================= USER =================
       if (this.userConnected) {
@@ -89,6 +90,7 @@ export class Devis implements OnInit {
             this.currentUser = user;
             this.currentUserId = user?.id || null;
 
+            // 🔥 auto-fill
             this.form.nom = user?.nom || '';
             this.form.email = user?.email || '';
 
@@ -97,8 +99,10 @@ export class Devis implements OnInit {
           error: () => {
             this.currentUser = null;
             this.currentUserId = null;
+
             this.form.nom = '';
             this.form.email = '';
+
             this.cdr.detectChanges();
           }
         });
@@ -107,9 +111,7 @@ export class Devis implements OnInit {
 
       this.initFields();
       this.setAutoValues();
-
     });
-
   }
 
   // ================= AUTO =================
@@ -182,44 +184,6 @@ export class Devis implements OnInit {
   }
 
   // ================= SUBMIT =================
-  /*submit(): void {
-
-    const specificDetails: any = {};
-
-    Object.keys(this.form)
-      .filter(key =>
-        this.form[key] !== null &&
-        this.form[key] !== '' &&
-        key !== 'nom' &&
-        key !== 'email' &&
-        key !== 'pole'
-      )
-      .forEach(key => {
-        specificDetails[key] = String(this.form[key]);
-      });
-
-    const payload = {
-      nom: this.form.nom,
-      email: this.form.email,
-      userId: this.currentUserId,   // ✅ FIX IMPORTANT
-      poleId: this.getPoleId(),
-      source: 'Website',
-      specificDetails: specificDetails
-    };
-
-    console.log("🚀 PAYLOAD FINAL =>", payload);
-
-    this.devisService.envoyerDevis(payload).subscribe({
-      next: (res) => {
-        console.log("✅ SUCCESS =>", res);
-        alert("Devis envoyé avec succès 🚀");
-      },
-      error: (err) => {
-        console.log("❌ ERROR =>", err);
-        alert("Erreur lors de l’envoi");
-      }
-    });
-  }*/
   submit(): void {
 
     const specificDetails: any = {};
@@ -236,12 +200,12 @@ export class Devis implements OnInit {
         specificDetails[key] = String(this.form[key]);
       });
 
+    // 🔥 FIX IMPORTANT : user connecté ou guest
     const payload = {
       userId: this.currentUser?.id || null,
 
-      // 👤 guest only
-      nom: this.currentUser ? null : this.form.nom,
-      email: this.currentUser ? null : this.form.email,
+      nom: this.currentUser ? this.currentUser.nom : this.form.nom,
+      email: this.currentUser ? this.currentUser.email : this.form.email,
 
       poleId: this.getPoleId(),
       source: 'Website',
@@ -253,20 +217,21 @@ export class Devis implements OnInit {
 
     this.devisService.envoyerDevis(payload).subscribe({
       next: (res) => {
+
         console.log("SUCCESS", res);
 
         this.toastr.success(
           'Votre devis a été envoyé avec succès 🚀',
           'Succès'
         );
-        // 🔥 redirection vers home
+
         setTimeout(() => {
           this.router.navigate(['']);
         }, 1000);
       },
 
-
       error: (err) => {
+
         console.error("ERROR", err);
 
         this.toastr.error(
