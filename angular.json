@@ -14,6 +14,7 @@
       "sourceRoot": "src",
       "prefix": "app",
       "architect": {
+
         "build": {
           "builder": "@angular/build:application",
           "options": {
@@ -32,6 +33,7 @@
               "node_modules/ngx-toastr/toastr.css",
               "src/styles.css"
             ],
+
             "scripts": [
               "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
             ],
@@ -42,6 +44,7 @@
               "entry": "src/server.ts"
             }
           },
+
           "configurations": {
             "production": {
               "budgets": [
@@ -58,16 +61,26 @@
               ],
               "outputHashing": "all"
             },
+
             "development": {
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
             }
           },
+
           "defaultConfiguration": "production"
         },
+
         "serve": {
           "builder": "@angular/build:dev-server",
+
+          "options": {
+            "allowedHosts": [
+              "hub.honeygroupmadatourism.com"
+            ]
+          },
+
           "configurations": {
             "production": {
               "buildTarget": "Honey_Group:build:production"
@@ -76,8 +89,10 @@
               "buildTarget": "Honey_Group:build:development"
             }
           },
+
           "defaultConfiguration": "development"
         },
+
         "test": {
           "builder": "@angular/build:unit-test"
         }
