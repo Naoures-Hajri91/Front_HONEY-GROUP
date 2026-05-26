@@ -5,16 +5,17 @@ import {
   ChangeDetectorRef
 } from '@angular/core';
 
-import { ActivatedRoute } from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Auth } from '../../services/auth';
 import { DevisService } from '../../services/devis-service';
 import {ToastrService} from 'ngx-toastr';
+import {Header} from '../header/header';
 
 @Component({
   selector: 'app-devis',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, Header],
   templateUrl: './devis.html',
   styleUrl: './devis.css',
 })
@@ -25,6 +26,7 @@ export class Devis implements OnInit {
   private devisService = inject(DevisService);
   private cdr = inject(ChangeDetectorRef);
   private toastr= inject(ToastrService);
+  private router = inject(Router);
 
   pole: string = '';
   userConnected = false;
@@ -256,7 +258,12 @@ export class Devis implements OnInit {
           'Votre devis a été envoyé avec succès 🚀',
           'Succès'
         );
+        // 🔥 redirection vers home
+        setTimeout(() => {
+          this.router.navigate(['']);
+        }, 1000);
       },
+
 
       error: (err) => {
         console.error("ERROR", err);
