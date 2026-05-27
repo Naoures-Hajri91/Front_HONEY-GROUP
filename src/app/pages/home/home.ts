@@ -1,6 +1,4 @@
 import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
-import { Header } from '../header/header';
-import { Footer } from '../footer/footer';
 import { Poles } from '../../services/poles';
 import {Router, RouterLink} from '@angular/router';
 
@@ -8,8 +6,6 @@ import {Router, RouterLink} from '@angular/router';
   selector: 'app-home',
   standalone: true,
   imports: [
-    Header,
-    Footer,
     RouterLink
   ],
   templateUrl: './home.html',

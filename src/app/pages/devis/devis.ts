@@ -10,13 +10,11 @@ import { FormsModule } from '@angular/forms';
 import { Auth } from '../../services/auth';
 import { DevisService } from '../../services/devis-service';
 import { ToastrService } from 'ngx-toastr';
-import { Header } from '../header/header';
-import { Footer } from '../footer/footer';
 
 @Component({
   selector: 'app-devis',
   standalone: true,
-  imports: [FormsModule, Header, Footer],
+  imports: [FormsModule],
   templateUrl: './devis.html',
   styleUrl: './devis.css',
 })
