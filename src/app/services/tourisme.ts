@@ -43,15 +43,33 @@ export class TourismeService {
   private apiUrl = 'http://localhost:8080/api';
 
   getPrestations(): Observable<Prestation[]> {
-    return this.http.get<Prestation[]>(`${this.apiUrl}/prestations`);
+    return this.http
+      .get<Prestation[]>(`${this.apiUrl}/prestations`)
+      .pipe(map((list) => list.map((p) => this.normaliserPrestation(p))));
   }
 
   getPrestationById(id: number): Observable<Prestation> {
-    return this.http.get<Prestation>(`${this.apiUrl}/prestations/${id}`);
+    return this.http
+      .get<Prestation>(`${this.apiUrl}/prestations/${id}`)
+      .pipe(map((p) => this.normaliserPrestation(p)));
   }
 
   getPrestationsByPole(idPole: number): Observable<Prestation[]> {
-    return this.http.get<Prestation[]>(`${this.apiUrl}/prestations/pole/${idPole}`);
+    return this.http
+      .get<Prestation[]>(`${this.apiUrl}/prestations/pole/${idPole}`)
+      .pipe(map((list) => list.map((p) => this.normaliserPrestation(p))));
+  }
+
+  private normaliserPrestation(p: Prestation): Prestation {
+    let metadata = p.metadata;
+    if (typeof metadata === 'string') {
+      try {
+        metadata = JSON.parse(metadata);
+      } catch {
+        metadata = undefined;
+      }
+    }
+    return { ...p, metadata };
   }
 
   /**
@@ -89,8 +107,6 @@ export class TourismeService {
    * Prévient les problèmes de NaN et d'énumération incorrecte
    */
   private normaliserSession(sessionData: any): Session {
-    console.log('🔍 Session BRUTE reçue du backend:', sessionData);
-
     // MAPPER les noms du backend vers le modèle Session
     // Backend envoie: participantsActuels, statut
     // Modèle attend: nbInscrits, statutSession
@@ -127,7 +143,6 @@ export class TourismeService {
       idPrestation: prestationIdFound
     };
 
-    console.log('✅ Session NORMALISÉE:', sessionNormalisee);
     return sessionNormalisee;
   }
 }

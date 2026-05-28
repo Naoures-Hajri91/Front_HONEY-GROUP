@@ -1,7 +1,9 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { TourismeService, Prestation, Session, BookingRequest } from '../../services/tourisme';
+import { Auth } from '../../services/auth';
+import { ToastrService } from 'ngx-toastr';
 import { TypePayment } from '../../models/payment';
 import { TypeReservation } from '../../models/reservation';
 
@@ -17,7 +19,10 @@ export class TourismeReservation implements OnInit {
 
   // Injection moderne des dépendances d'Angular
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private tourismeService = inject(TourismeService);
+  private authService = inject(Auth);
+  private toastr = inject(ToastrService);
 
   // Passerelle pour rendre l'énumération accessible dans le fichier HTML
   protected readonly TypePayment = TypePayment;
@@ -97,7 +102,15 @@ export class TourismeReservation implements OnInit {
    */
   confirmerReservation(): void {
     if (!this.sessionSelectionnee) {
-      alert("Impossible de réserver, aucune session n'est sélectionnée.");
+      this.toastr.warning("Impossible de réserver, aucune session n'est sélectionnée.");
+      return;
+    }
+
+    if (!this.authService.isAuthenticated()) {
+      this.toastr.info('Connectez-vous pour finaliser votre réservation.');
+      this.router.navigate(['/login'], {
+        queryParams: { returnUrl: this.router.url },
+      });
       return;
     }
 
@@ -109,13 +122,27 @@ export class TourismeReservation implements OnInit {
     };
 
     this.tourismeService.creerReservation(payload).subscribe({
-      next: (response) => {
-        console.log('Réservation sandbox validée !', response);
-        alert('Félicitations, votre réservation a bien été enregistrée !');
+      next: () => {
+        this.toastr.success('Votre réservation a bien été enregistrée !');
+        this.router.navigate(['/tourisme/catalogue']);
       },
       error: (err) => {
-        console.error("Erreur lors de la création de la réservation", err);
-        alert("Une erreur est survenue lors de la validation. Veuillez réessayer.");
+        console.error('Erreur lors de la création de la réservation', err);
+
+        if (err.status === 401 || err.status === 403) {
+          this.toastr.warning('Session expirée ou accès refusé. Reconnectez-vous pour réserver.');
+          this.router.navigate(['/login'], {
+            queryParams: { returnUrl: this.router.url },
+          });
+          return;
+        }
+
+        const message =
+          err?.error?.message ||
+          err?.error ||
+          'Une erreur est survenue lors de la validation. Veuillez réessayer.';
+
+        this.toastr.error(message, 'Erreur');
       }
     });
   }

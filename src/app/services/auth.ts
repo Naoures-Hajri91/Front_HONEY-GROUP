@@ -1,6 +1,7 @@
 import {inject, Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
+import { ProfileUpdatePayload, UserProfile } from '../models/user-profile';
 
 @Injectable({
   providedIn: 'root',
@@ -28,8 +29,16 @@ export class Auth {
   }
 
   // ✅ CURRENT USER
-  getCurrentUser() {
-    return this.http.get<any>(`${this.apiAuth}/me`);
+  getCurrentUser(): Observable<UserProfile> {
+    return this.http.get<UserProfile>(`${this.apiAuth}/me`);
+  }
+
+  updateProfile(payload: ProfileUpdatePayload): Observable<UserProfile> {
+    return this.http.put<UserProfile>(`${this.apiAuth}/me/profile`, payload);
+  }
+
+  forgotPassword(email: string): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/forgot-password`, { email });
   }
 
   isAuthenticated(): boolean {

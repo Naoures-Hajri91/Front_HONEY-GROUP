@@ -86,14 +86,9 @@ export class Home implements OnInit {
       return;
     }
 
-    // 💻 IT
+    // 💻 IT — catalogue & devis sur le portail unifié
     if (p.includes('it') || p.includes('digital')) {
-
-      window.open(
-        'https://www.honeygroupitmada.com/',
-        '_blank'
-      );
-
+      this.router.navigate(['/it-digital']);
       return;
     }
 

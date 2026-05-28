@@ -6,6 +6,7 @@ import {
 } from '@angular/core';
 
 import { ActivatedRoute, Router } from '@angular/router';
+import { combineLatest } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { Auth } from '../../services/auth';
 import { DevisService } from '../../services/devis-service';
@@ -46,6 +47,8 @@ export class Devis implements OnInit {
     confort: '',
     notes: '',
 
+    prestationId: null as number | null,
+
     // IT
     typeProjet: '',
     urgence: '',
@@ -66,7 +69,7 @@ export class Devis implements OnInit {
 
   ngOnInit(): void {
 
-    this.route.paramMap.subscribe(params => {
+    combineLatest([this.route.paramMap, this.route.queryParamMap]).subscribe(([params, query]) => {
 
       const rawPole = params.get('pole') || '';
 
@@ -76,6 +79,15 @@ export class Devis implements OnInit {
         .replace(/[\u0300-\u036f]/g, "");
 
       this.form.pole = this.pole;
+
+      const prestationId = query.get('prestationId');
+      const prestationNom = query.get('prestation');
+      if (prestationId) {
+        this.form.prestationId = Number(prestationId);
+      }
+      if (prestationNom && (this.pole.includes('it') || this.pole.includes('digital'))) {
+        this.form.typeProjet = prestationNom;
+      }
 
       this.userConnected = this.userService.isAuthenticated();
 
@@ -192,14 +204,15 @@ export class Devis implements OnInit {
         this.form[key] !== '' &&
         key !== 'nom' &&
         key !== 'email' &&
-        key !== 'pole'
+        key !== 'pole' &&
+        key !== 'prestationId'
       )
       .forEach(key => {
         specificDetails[key] = String(this.form[key]);
       });
 
     // 🔥 FIX IMPORTANT : user connecté ou guest
-    const payload = {
+    const payload: Record<string, unknown> = {
       userId: this.currentUser?.id || null,
 
       nom: this.currentUser ? this.currentUser.nom : this.form.nom,
@@ -210,6 +223,10 @@ export class Devis implements OnInit {
 
       specificDetails
     };
+
+    if (this.form.prestationId) {
+      payload['prestationId'] = this.form.prestationId;
+    }
 
     console.log("🚀 PAYLOAD FINAL =>", payload);
 

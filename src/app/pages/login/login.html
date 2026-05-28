@@ -17,6 +17,12 @@
 
       <h2>Connexion</h2>
 
+      @if (connexionPourReservation) {
+        <p class="auth-hint mb-3">
+          Un compte est requis pour réserver une session. Connectez-vous pour continuer.
+        </p>
+      }
+
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" autocomplete="off">
 
         <!-- anti-autofill -->
@@ -57,7 +63,7 @@
         <!-- REGISTER LINK -->
         <p class="register">
           Nouveau chez Honey Group ?
-          <a routerLink="/register">Créer un compte</a>
+          <a [routerLink]="['/register']" [queryParams]="registerQueryParams">Créer un compte</a>
         </p>
 
       </form>

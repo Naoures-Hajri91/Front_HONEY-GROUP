@@ -5,7 +5,7 @@
         <span class="badge bg-primary px-3 py-2 rounded-pill mb-3 text-uppercase tracking-wider">Pôle Innovation & Tech</span>
         <h1 class="display-4 fw-black mb-3">L'ingénierie logicielle au service de votre croissance</h1>
         <p class="fs-5 text-secondary mb-4">Nous concevons des architectures robustes et des applications intelligentes pour propulser votre entreprise dans l'ère du digital.</p>
-        <a routerLink="/devis/it-digital" class="btn btn-outline-light btn-lg px-4 me-3">Lancer un projet</a>
+        <a routerLink="/devis/it-digital" class="btn btn-outline-light btn-lg px-4 me-3">Demander un devis</a>
       </div>
       <div class="col-lg-5 text-center d-none d-lg-block">
         <div class="p-4 bg-black bg-opacity-40 border border-secondary border-opacity-25 rounded-3 text-start shadow-lg font-monospace" style="font-size: 0.85rem; color: #38bdf8;">
@@ -83,8 +83,71 @@
     </div>
   </div>
 
+  <div class="my-5 py-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3 mb-4">
+      <div>
+        <span class="text-primary fw-bold text-uppercase small">Catalogue IT</span>
+        <h2 class="fw-bold mt-1 mb-2">Nos prestations sur-mesure</h2>
+        <p class="text-muted mb-0">
+          Développement, cloud et hébergement : chaque projet est chiffré et planifié avec vous.
+          Pas de départ à date fixe — demandez un devis pour lancer votre étude.
+        </p>
+      </div>
+      <div class="input-group" style="max-width: 320px;">
+        <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+        <input
+          type="text"
+          class="form-control"
+          placeholder="Rechercher un service…"
+          (input)="onRecherche($event)"
+        />
+      </div>
+    </div>
+
+    @if (chargement) {
+      <div class="text-center py-5">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="text-muted mt-3 mb-0">Chargement des prestations…</p>
+      </div>
+    } @else if (erreurChargement) {
+      <div class="alert alert-danger">
+        Impossible de charger le catalogue IT.
+        <button type="button" class="btn btn-sm btn-outline-danger ms-2" (click)="chargerPrestationsIt()">Réessayer</button>
+      </div>
+    } @else if (prestationsFiltrees.length === 0) {
+      <p class="text-muted text-center py-4">Aucune prestation ne correspond à votre recherche.</p>
+    } @else {
+      <div class="row g-4">
+        @for (p of prestationsFiltrees; track p.id) {
+          <div class="col-md-6 col-lg-4">
+            <div class="card h-100 border-0 shadow-sm it-prestation-card">
+              <div class="card-body p-4 d-flex flex-column">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                  <h5 class="fw-bold mb-0">{{ p.titreService }}</h5>
+                  <span class="badge bg-primary-subtle text-primary ms-2">Sur-mesure</span>
+                </div>
+                <p class="text-muted small flex-grow-1">{{ p.description }}</p>
+                <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                  <span class="fw-bold text-primary">à partir de {{ p.prixBase }} €</span>
+                  <a
+                    class="btn btn-primary btn-sm"
+                    [routerLink]="lienDevis(p)"
+                    [queryParams]="queryDevis(p)"
+                  >
+                    Demander un devis
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
   <div class="text-center my-5 py-4">
     <h3 class="fw-bold mb-3">Prêt à moderniser vos outils ?</h3>
+    <p class="text-muted mb-3">Un chef de projet vous recontacte pour cadrer délais et budget.</p>
     <a routerLink="/devis/it-digital" class="btn btn-primary btn-lg px-5 shadow-sm">Demander une étude technique</a>
   </div>
 

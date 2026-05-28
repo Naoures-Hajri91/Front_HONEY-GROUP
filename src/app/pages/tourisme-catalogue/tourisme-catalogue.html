@@ -48,34 +48,54 @@
     <!-- Liste des Prestations -->
     <div class="col-lg-9">
       <div class="d-flex justify-content-between align-items-center mb-4 bg-light p-3 rounded-3 border">
-        <div class="text-muted small"><strong>{{ prestationsFiltreres.length }}</strong> prestation(s) trouvée(s)</div>
+        <div class="text-muted small">
+          @if (cataloguePret) {
+            <strong>{{ prestationsFiltreres.length }}</strong> prestation(s) trouvée(s)
+          } @else {
+            Chargement du catalogue…
+          }
+        </div>
       </div>
 
       <div class="row g-4">
-        @for (prestation of prestationsVisibles; track prestation.id) {
-          <div class="col-md-6">
-            <div class="card h-100 border-0 shadow-sm catalogue-card position-relative" (click)="ouvrirSessions(prestation)" style="cursor: pointer;" role="button" tabindex="0" [attr.aria-label]="'Voir les sessions pour ' + prestation.titreService">
-              <span class="position-absolute bg-dark text-white fw-bold px-3 py-2 rounded-end shadow-sm" style="top: 15px; left: 0; z-index: 3; font-size: 0.9rem;">{{ prestation.prixBase }} €</span>
-              <div class="card-img-top bg-secondary bg-opacity-10 d-flex align-items-center justify-content-center" 
-                   [style.background]="prestation.imageUrl ? 'url(' + prestation.imageUrl + ') no-repeat center center / cover' : ''"
-                   style="height: 200px;">
-                @if (!prestation.imageUrl) {
-                  <i class="bi bi-compass text-muted opacity-25 display-4"></i>
-                }
-              </div>
-              <div class="card-body p-4">
-                <h5 class="card-title fw-bold text-dark mb-2">{{ prestation.titreService }}</h5>
-                <p class="card-text text-muted small">{{ prestation.description }}</p>
-              </div>
-              <div class="card-footer bg-transparent border-0 px-4 pb-4 pt-0 text-end">
-                <button type="button" class="btn btn-primary btn-sm px-3" (click)="ouvrirSessions(prestation); $event.stopPropagation()">Découvrir les sessions</button>
-              </div>
-            </div>
+        @if (!cataloguePret) {
+          <div class="col-12 text-center py-5">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="text-muted mt-3 mb-0">Chargement des prestations…</p>
           </div>
-        } @empty {
+        } @else if (erreurChargement) {
+          <div class="col-12 text-center py-5">
+            <p class="text-danger mb-3">Impossible de charger le catalogue.</p>
+            <button type="button" class="btn btn-outline-primary btn-sm" (click)="chargerDonneesDynamiques()">
+              Réessayer
+            </button>
+          </div>
+        } @else if (prestationsVisibles.length === 0) {
           <div class="col-12 text-center py-5">
             <h5 class="text-secondary">Aucune prestation trouvée.</h5>
           </div>
+        } @else {
+          @for (prestation of prestationsVisibles; track prestation.id) {
+            <div class="col-md-6">
+              <div class="card h-100 border-0 shadow-sm catalogue-card position-relative" (click)="ouvrirSessions(prestation)" style="cursor: pointer;" role="button" tabindex="0" [attr.aria-label]="'Voir les sessions pour ' + prestation.titreService">
+                <span class="position-absolute bg-dark text-white fw-bold px-3 py-2 rounded-end shadow-sm" style="top: 15px; left: 0; z-index: 3; font-size: 0.9rem;">{{ prestation.prixBase }} €</span>
+                <div class="card-img-top bg-secondary bg-opacity-10 d-flex align-items-center justify-content-center" 
+                     [style.background]="prestation.imageUrl ? 'url(' + prestation.imageUrl + ') no-repeat center center / cover' : ''"
+                     style="height: 200px;">
+                  @if (!prestation.imageUrl) {
+                    <i class="bi bi-compass text-muted opacity-25 display-4"></i>
+                  }
+                </div>
+                <div class="card-body p-4">
+                  <h5 class="card-title fw-bold text-dark mb-2">{{ prestation.titreService }}</h5>
+                  <p class="card-text text-muted small">{{ prestation.description }}</p>
+                </div>
+                <div class="card-footer bg-transparent border-0 px-4 pb-4 pt-0 text-end">
+                  <button type="button" class="btn btn-primary btn-sm px-3" (click)="ouvrirSessions(prestation); $event.stopPropagation()">Découvrir les sessions</button>
+                </div>
+              </div>
+            </div>
+          }
         }
       </div>
 
@@ -89,148 +109,11 @@
   </div>
 </div>
 
-<!-- Modale Sessions -->
-@if (modalOuverte && prestationSelectionnee) {
-  <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);" role="dialog" aria-modal="true">
-    <div class="modal-dialog modal-dialog-centered modal-xl" style="max-width: 90vw;" role="document">
-      <div class="modal-content border-0 shadow-lg">
-        <div class="modal-header text-white p-4" 
-             [style.background]="prestationSelectionnee.imageUrl ? 'linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.75)), url(' + prestationSelectionnee.imageUrl + ') no-repeat center center / cover' : 'linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.75)), url(https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?q=80&w=1200) no-repeat center center / cover'">
-          <div class="w-100">
-            <h5 class="modal-title fw-bold mb-2">Sessions : {{ prestationSelectionnee.titreService }}</h5>
-            <p class="text-light text-opacity-75 small mb-0">{{ prestationSelectionnee.description }}</p>
-          </div>
-          <button type="button" class="btn-close btn-close-white" (click)="fermerSessions()"></button>
-        </div>
-        
-        <div class="modal-body p-4">
-          <!-- Filtres de la modale -->
-          <div class="row g-2 mb-4 align-items-end bg-light p-3 rounded-3">
-            <div class="col-md-3">
-              <label class="small fw-bold">Statut</label>
-              <select class="form-select form-select-sm" [(ngModel)]="filtreStatut" (change)="appliquerFiltresSession()">
-                <option value="">Tous</option>
-                <option value="OUVERT">Disponible (Ouvert)</option>
-                <option value="COMPLET">Complet</option>
-                <option value="EN_COURS">En cours</option>
-                <option value="CLOTURE">Clôturé</option>
-                <option value="ANNULE">Annulé</option>
-              </select>
-            </div>
-            <div class="col-md-2">
-              <label class="small fw-bold">Places min.</label>
-              <input type="number" class="form-control form-control-sm" min="0" [(ngModel)]="filtrePlaces" (input)="appliquerFiltresSession()">
-            </div>
-            <div class="col-md-3">
-              <label class="small fw-bold">Date min.</label>
-              <input type="date" class="form-control form-control-sm" [(ngModel)]="filtreDateDebut" (change)="appliquerFiltresSession()">
-            </div>
-            <div class="col-md-4 text-end">
-              <small class="text-muted">{{ sessionsFiltrees.length }} session(s) trouvée(s)</small>
-            </div>
-          </div>
-
-          <!-- Table des Sessions -->
-          <div class="table-responsive">
-            <table class="table table-hover align-middle">
-              <thead class="table-light">
-                <tr>
-                  <th>Départ</th>
-                  <th>Retour</th>
-                  <th class="text-center">Capacité</th>
-                  <th class="text-center">Disponible</th>
-                  <th class="text-center">Remplissage</th>
-                  <th class="text-center">Statut</th>
-                  <th class="text-end">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (session of sessionsPaginees; track session.id) {
-                  <tr>
-                    <td><strong>{{ session.dateDebut | date:'dd/MM/yyyy HH:mm' }}</strong></td>
-                    <td>{{ session.dateFin | date:'dd/MM/yyyy HH:mm' }}</td>
-                    <td class="text-center">
-                      <span class="badge bg-info">{{ session.capaciteMax }}</span>
-                    </td>
-                    <td class="text-center">
-                      <span [ngClass]="{
-                        'text-success fw-bold': (session.capaciteMax - session.nbInscrits) > 0,
-                        'text-danger fw-bold': (session.capaciteMax - session.nbInscrits) === 0
-                      }">
-                        {{ session.capaciteMax - session.nbInscrits }} / {{ session.capaciteMax }}
-                      </span>
-                    </td>
-                    <td class="text-center">
-                      <div class="progress" style="height: 20px; width: 100px; margin: 0 auto;">
-                        <div class="progress-bar"
-                             [ngClass]="{
-                               'bg-success': ((session.nbInscrits / session.capaciteMax) * 100) < 75,
-                               'bg-warning': ((session.nbInscrits / session.capaciteMax) * 100) >= 75 && ((session.nbInscrits / session.capaciteMax) * 100) < 100,
-                               'bg-danger': ((session.nbInscrits / session.capaciteMax) * 100) === 100
-                             }"
-                             [style.width.%]="(session.nbInscrits / session.capaciteMax) * 100"
-                             role="progressbar">
-                          {{ ((session.nbInscrits / session.capaciteMax) * 100).toFixed(0) }}%
-                        </div>
-                      </div>
-                    </td>
-                    <td class="text-center">
-                      <span class="badge" 
-                            [ngClass]="{
-                              'bg-success': session.statutSession === 'OUVERT',
-                              'bg-warning text-dark': session.statutSession === 'COMPLET',
-                              'bg-info': session.statutSession === 'EN_COURS',
-                              'bg-secondary': session.statutSession === 'CLOTURE',
-                              'bg-danger': session.statutSession === 'ANNULE'
-                            }">
-                        {{ session.statutSession }}
-                      </span>
-                    </td>
-                    <td class="text-end">
-                      <button type="button" 
-                              class="btn btn-sm btn-primary" 
-                              [disabled]="session.statutSession !== 'OUVERT'" 
-                              [routerLink]="['/tourisme/reservation', session.id]">
-                        Réserver
-                      </button>
-                    </td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          </div>
-
-          <!-- Pagination -->
-          @if (sessionsFiltrees.length > itemsParPageSession) {
-            <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
-              <div class="text-muted small">
-                Affichage {{ ((pageSession - 1) * itemsParPageSession) + 1 }} à 
-                {{ Math.min(pageSession * itemsParPageSession, sessionsFiltrees.length) }} 
-                sur {{ sessionsFiltrees.length }} session(s)
-              </div>
-              <div>
-                <button class="btn btn-sm btn-outline-primary" [disabled]="pageSession === 1" (click)="pageSession = pageSession - 1">
-                  <i class="bi bi-chevron-left"></i> Précédent
-                </button>
-                <span class="align-self-center px-3">Page {{ pageSession }} / {{ Math.ceil(sessionsFiltrees.length / itemsParPageSession) }}</span>
-                <button class="btn btn-sm btn-outline-primary" [disabled]="pageSession * itemsParPageSession >= sessionsFiltrees.length" (click)="pageSession = pageSession + 1">
-                  Suivant <i class="bi bi-chevron-right"></i>
-                </button>
-              </div>
-            </div>
-          }
-
-          @if (sessionsFiltrees.length === 0) {
-            <div class="alert alert-info mt-4" role="alert">
-              <i class="bi bi-info-circle me-2"></i> Aucune session ne correspond à vos critères de filtrage.
-            </div>
-          }
-        </div>
-        <div class="modal-footer bg-light"><button type="button" class="btn btn-secondary" (click)="fermerSessions()">Fermer</button></div>
-      </div>
-    </div>
-  </div>
-}
+<app-sessions-prestation-modal
+  [ouverte]="modalOuverte"
+  [prestation]="prestationSelectionnee"
+  (fermer)="fermerSessions()"
+/>
 ```
 
 ```diff

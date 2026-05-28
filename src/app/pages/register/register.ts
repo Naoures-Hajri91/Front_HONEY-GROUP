@@ -1,22 +1,39 @@
-import {Component, inject} from '@angular/core';
+import {Component, inject, OnInit} from '@angular/core';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {CommonModule} from '@angular/common';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import {Auth} from '../../services/auth';
 import {ToastrService} from 'ngx-toastr';
 @Component({
   selector: 'app-register',
-  imports: [ ReactiveFormsModule,  CommonModule,],
+  imports: [ReactiveFormsModule, CommonModule, RouterModule],
   templateUrl: './register.html',
   styleUrl: './register.css',
 })
-export class Register {
+export class Register implements OnInit {
   private fb = inject(FormBuilder);
   private authService = inject(Auth);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private toastr = inject(ToastrService);
 
+  loginQueryParams: { returnUrl?: string } = {};
+
   errorMessage: string | null = null;
+
+  ngOnInit(): void {
+    if (this.authService.isAuthenticated()) {
+      this.router.navigate(['/mon-compte']);
+      return;
+    }
+
+    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+
+    if (returnUrl?.startsWith('/')) {
+      this.loginQueryParams = { returnUrl };
+    }
+  }
+
   registerForm: FormGroup = this.fb.group({
 
     nom: ['', [
@@ -93,7 +110,7 @@ export class Register {
           'Succès'
         );
 
-        this.router.navigate(['/login']);
+        this.router.navigate(['/login'], { queryParams: this.loginQueryParams });
       },
 
       error: (err: any) => {
