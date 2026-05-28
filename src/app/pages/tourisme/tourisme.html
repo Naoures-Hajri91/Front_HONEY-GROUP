@@ -1,7 +1,7 @@
 <div class="bg-dark text-white py-5 mb-5" style="background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=1200') no-repeat center center; background-size: cover;">
   <div class="container py-5 text-center">
     <h1 class="display-3 fw-bold mb-3">Pôle Tourisme</h1>
-    <p class="lead mb-4 fs-4">Façonner des experiences de voyage uniques et des solutions de gestion d'exception.</p>
+    <p class="lead mb-4 fs-4">Façonner des expériences de voyage uniques et des solutions de gestion d'exception.</p>
     <div class="mx-auto" style="width: 60px; height: 3px; background-color: #ffc107;"></div>
   </div>
 </div>
@@ -14,7 +14,7 @@
       <h2 class="mt-2 mb-4 fw-bold">L'expertise au service de vos évasions</h2>
       <p class="text-muted justify-content-center">
         Honey Group accompagne les acteurs du tourisme et les voyageurs dans la concrétisation de leurs projets. 
-        De la gestion operational d'infrastructures à la création de circuits sur-mesure, notre engagement 
+        De la gestion opérationnelle d'infrastructures à la création de circuits sur-mesure, notre engagement 
         repose sur la qualité, la durabilité et l'excellence du service.
       </p>
     </div>
@@ -88,14 +88,14 @@
         
         <div class="carousel-item active">
           <div class="row g-4 justify-content-center">
-            @for (prestation of prestationsTourisme.slice(0, 2); track prestation.id_prestation) {
+            @for (prestation of prestationsTourisme.slice(0, 2); track prestation.id) {
               <div class="col-md-6">
                 <div class="card h-100 border shadow-sm hover-up position-relative" (click)="ouvrirSessions(prestation)" style="cursor: pointer;">
                   <div class="card-body p-4">
                     <div class="d-flex justify-content-between align-items-start mb-3">
-                      <h4 class="card-title fw-bold text-dark mb-0">{{ prestation.titre_service }}</h4>
+                      <h4 class="card-title fw-bold text-dark mb-0">{{ prestation.titreService }}</h4>
                       <span class="badge bg-success-subtle text-success px-3 py-2 rounded-pill fw-bold">
-                        Dès {{ prestation.prix_base }} €
+                        Dès {{ prestation.prixBase }} €
                       </span>
                     </div>
                     
@@ -103,9 +103,9 @@
                     
                     @if (prestation.metadata?.lieu_depart) {
                       <div class="bg-light p-3 rounded-3 d-flex align-items-center justify-content-between small text-muted">
-                        <div><i class="bi bi-geo-alt-fill text-danger me-2"></i>Départ : <strong>{{ prestation.metadata.lieu_depart }}</strong></div>
+                        <div><i class="bi bi-geo-alt-fill text-danger me-2"></i>Départ : <strong>{{ prestation.metadata?.lieu_depart }}</strong></div>
                         <div><i class="bi bi-arrow-right text-primary mx-2"></i></div>
-                        <div><i class="bi bi-flag-fill text-success me-2"></i>Arrivée : <strong>{{ prestation.metadata.lieu_arrivee }}</strong></div>
+                        <div><i class="bi bi-flag-fill text-success me-2"></i>Arrivée : <strong>{{ prestation.metadata?.lieu_arrivee }}</strong></div>
                       </div>
                     }
                   </div>
@@ -146,7 +146,7 @@
 
     <div class="text-center mb-5">
       <a routerLink="/tourisme/catalogue" class="btn btn-outline-primary btn-lg px-5 fw-semibold shadow-sm">
-        <i class="bi bi-grid-3x3-gap me-2"></i>Explorer tout le catalogue (100+ destinations)
+        <i class="bi bi-grid-3x3-gap me-2"></i>Explorer tout le catalogue
       </a>
     </div>
   </div>
@@ -158,7 +158,7 @@
           
           <div class="modal-header bg-dark text-white p-4">
             <h5 class="modal-title fw-bold" id="modalPrestationLabel">
-              <i class="bi bi-calendar3 me-2 text-warning"></i> Sessions : {{ prestationSelectionnee.titre_service }}
+              <i class="bi bi-calendar3 me-2 text-warning"></i> Sessions : {{ prestationSelectionnee.titreService }}
             </h5>
             <button type="button" class="btn-close btn-close-white" (click)="fermerSessions()"></button>
           </div>
@@ -180,24 +180,26 @@
                   </tr>
                 </thead>
                 <tbody>
-                  @for (session of filtrerSessionsParPrestation(prestationSelectionnee.id_prestation); track session.date_debut) {
+                  @for (session of filtrerSessionsParPrestation(prestationSelectionnee.id); track session.id) {
                     <tr>
-                      <td class="fw-semibold">{{ session.date_debut | date:'dd/MM/yyyy' }}</td>
-                      <td class="fw-semibold">{{ session.date_fin | date:'dd/MM/yyyy' }}</td>
+                      <td class="fw-semibold">{{ session.dateDebut | date:'dd/MM/yyyy' }}</td>
+                      <td class="fw-semibold">{{ session.dateFin | date:'dd/MM/yyyy' }}</td>
                       <td class="text-center">
-                        <span class="fw-bold">{{ session.capacite_max - session.nb_inscrits }}</span> / {{ session.capacite_max }}
+                        <span class="fw-bold">{{ session.capaciteMax - session.nbInscrits }}</span> / {{ session.capaciteMax }}
                       </td>
                       <td class="text-center">
-                        @if (session.statut_session === 'OUVERT') {
+                        @if (session.statutSession === 'OUVERT') {
                           <span class="badge bg-success px-2.5 py-1.5">Disponible</span>
-                        } @else if (session.statut_session === 'EN_COURS') {
+                        } @else if (session.statutSession === 'EN_COURS') {
                           <span class="badge bg-warning text-dark px-2.5 py-1.5">En cours</span>
                         } @else {
                           <span class="badge bg-danger px-2.5 py-1.5">Complet</span>
                         }
                       </td>
                       <td class="text-end">
-                        <button class="btn btn-sm btn-primary px-3" [disabled]="session.statut_session !== 'OUVERT'">
+                        <button class="btn btn-sm btn-primary px-3" 
+                                [disabled]="session.statutSession !== 'OUVERT'"
+                                [routerLink]="['/tourisme/reservation', session.id]">
                           Réserver
                         </button>
                       </td>

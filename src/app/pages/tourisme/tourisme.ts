@@ -1,47 +1,69 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common'; // Important pour le pipe | date
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+
+// Réutilisation des interfaces alignées sur ton backend Spring Boot
+export interface PrestationMetadata {
+  id_metadata?: number;
+  lieu_depart: string;
+  lieu_arrivee: string;
+}
+
+export interface Prestation {
+  id: number; // private Long id;
+  titreService: string; // private String titreService;
+  description: string; // private String description;
+  prixBase: number; // private Double prixBase;
+  metadata?: PrestationMetadata;
+  statut: string; // private StatutPrestation statut;
+}
+
+export interface Session {
+  id: number; // private Long id;
+  dateDebut: Date | string; // private LocalDateTime dateDebut;
+  dateFin: Date | string; // private LocalDateTime dateFin;
+  capaciteMax: number; // private Integer capaciteMax;
+  nbInscrits: number; // private Integer nbInscrits;
+  statutSession: 'OUVERT' | 'COMPLET' | 'EN_COURS' | 'CLOTURE' | 'ANNULE';
+  idPrestation: number; // ID de la prestation associée pour le filtrage
+}
 
 @Component({
   selector: 'app-tourisme',
+  standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './tourisme.html',
   styleUrl: './tourisme.css',
 })
-export class Tourisme {
+
+export class Tourisme implements OnInit {
+  
+  // Tableaux de données initialisés vides, en attente de la BDD
+  prestationsTourisme: Prestation[] = [];
+  listeSessions: Session[] = [];
+
   // Variables de gestion de la Pop-up
   modalOuverte: boolean = false;
-  prestationSelectionnee: any = null;
+  prestationSelectionnee: Prestation | null = null;
 
-  // Jeu de données fictif calqué sur tes insertions SQL (id_pole = 2)
-  prestationsTourisme: any[] = [
-    {
-      id_prestation: 9,
-      id_pole: 2,
-      titre_service: 'Trek & Découverte : Le Nord Sauvage',
-      description: 'Une aventure immersive de Diego-Suarez à Nosy Be, découvrez les Tsingy et la faune locale.',
-      prix_base: 1200.0,
-      metadata: { lieu_depart: 'Diego-Suarez', lieu_arrivee: 'Nosy Be' }
-    },
-    {
-      id_prestation: 10,
-      id_pole: 2,
-      titre_service: "L'Allée des Baobabs et Majestueux Sud",
-      description: 'Parcours photographique et solidaire à travers Morondava et les parcs nationaux du Sud.',
-      prix_base: 1450.0,
-      metadata: { lieu_depart: 'Morondava', lieu_arrivee: 'Sud-Madagascar' }
-    }
-  ];
+  constructor() {}
 
-  // Liste des sessions (calquée sur ton SQL)
-  listeSessions: any[] = [
-    { prestation_id: 9, date_debut: new Date('2026-05-15T08:00:00'), date_fin: new Date('2026-05-30T18:00:00'), capacite_max: 12, nb_inscrits: 2, statut_session: 'EN_COURS' },
-    { prestation_id: 9, date_debut: new Date('2026-09-10T08:00:00'), date_fin: new Date('2026-09-24T18:00:00'), capacite_max: 15, nb_inscrits: 0, statut_session: 'OUVERT' },
-    { prestation_id: 10, date_debut: new Date('2026-08-05T07:00:00'), date_fin: new Date('2026-08-20T19:00:00'), capacite_max: 8, nb_inscrits: 1, statut_session: 'OUVERT' }
-  ];
+  ngOnInit(): void {
+    this.chargerDonneesPoleTourisme();
+  }
+
+  /**
+   * Méthode à interconnecter avec ton service API pour Honey Group
+   */
+  chargerDonneesPoleTourisme(): void {
+    // TODO: Appel de ton service HTTP (ex: filtré sur l'id_pole = 2 ou via un endpoint dédié)
+    // Example:
+    // this.tourismeService.getPrestationsByPole(2).subscribe(data => this.prestationsTourisme = data);
+    // this.tourismeService.getSessionsActives().subscribe(data => this.listeSessions = data);
+  }
 
   // Ouvre la pop-up et stocke la prestation cliquée
-  ouvrirSessions(prestation: any) {
+  ouvrirSessions(prestation: Prestation) {
     this.prestationSelectionnee = prestation;
     this.modalOuverte = true;
   }
@@ -52,8 +74,8 @@ export class Tourisme {
     this.prestationSelectionnee = null;
   }
 
-  // Filtre les sessions qui appartiennent à la prestation sélectionnée
-  filtrerSessionsParPrestation(prestationId: number): any[] {
-    return this.listeSessions.filter(s => s.prestation_id === prestationId);
+  // Filtre les sessions qui appartiennent à la prestation sélectionnée (basé sur p.id et s.idPrestation)
+  filtrerSessionsParPrestation(prestationId: number): Session[] {
+    return this.listeSessions.filter(s => s.idPrestation === prestationId);
   }
 }

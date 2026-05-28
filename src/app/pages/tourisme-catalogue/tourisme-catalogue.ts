@@ -3,6 +3,31 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 
+export interface PrestationMetadata {
+  id_metadata?: number; // Clé spécifique à ton convertisseur ou ta table metadata si existante
+  lieu_depart: string;
+  lieu_arrivee: string;
+}
+
+export interface Prestation {
+  id: number; // Mappé sur private Long id;
+  titreService: string; // Mappé sur private String titreService;
+  description: string; // Mappé sur private String description;
+  prixBase: number; // Mappé sur private Double prixBase;
+  metadata?: PrestationMetadata; // Mappé sur private Map<String, Object> metadata;
+  statut: string; // Mappé sur private StatutPrestation statut;
+}
+
+export interface Session {
+  id: number; // Mappé sur private Long id;
+  dateDebut: Date | string; // Mappé sur private LocalDateTime dateDebut;
+  dateFin: Date | string; // Mappé sur private LocalDateTime dateFin;
+  capaciteMax: number; // Mappé sur private Integer capaciteMax;
+  nbInscrits: number; // Mappé sur private Integer nbInscrits;
+  statutSession: 'OUVERT' | 'COMPLET' | 'EN_COURS' | 'CLOTURE' | 'ANNULE'; // Mappé sur private StatutSession statutSession;
+  idPrestation: number; // Clé ou ID de l'objet Prestation associé lors de la sérialisation REST
+}
+
 @Component({
   selector: 'app-tourisme-catalogue',
   standalone: true,
@@ -14,18 +39,18 @@ export class TourismeCatalogue implements OnInit, AfterViewInit {
 
   @ViewChild('scrollSpy') scrollSpy!: ElementRef;
 
-  // Données globales
-  toutesLesPrestations: any[] = [];
-  toutesLesSessions: any[] = []; // Ajout du réservoir de sessions BDD
+  // Données globales issues de la BDD
+  toutesLesPrestations: Prestation[] = [];
+  toutesLesSessions: Session[] = []; 
   villesDepart: string[] = [];
 
   // Gestion de la modale
   modalOuverte: boolean = false;
-  adorationPrestationSelectionnee: any = null;
+  adorationPrestationSelectionnee: Prestation | null = null;
 
   // Tableaux de filtrage
-  prestationsFiltreres: any[] = [];
-  prestationsVisibles: any[] = [];
+  prestationsFiltreres: Prestation[] = [];
+  prestationsVisibles: Prestation[] = [];
 
   // Filtres
   rechercheTexte: string = '';
@@ -37,19 +62,35 @@ export class TourismeCatalogue implements OnInit, AfterViewInit {
   pageActuelle: number = 1;
   private observer!: IntersectionObserver;
 
+  constructor() {}
+
   ngOnInit(): void {
-    this.genererDonneesFictives();
-    this.genererSessionsFictives(); // Initialisation des dates disponibles
-    this.extraireVillesDepart();
-    this.filtrerPrestations();
+    this.chargerDonneesDepuisServeur();
   }
 
   ngAfterViewInit() {
     this.configurerInfiniteScroll();
   }
 
+  /**
+   * Méthode à interconnecter avec ton service API (ex: `this.tourismeService.getPrestations().subscribe(...)`)
+   */
+  chargerDonneesDepuisServeur(): void {
+    // TODO: Alimenter ces tableaux via des appels API de ton service HTTP depuis Spring Boot
+    // Exemples :
+    // this.tourismeService.getPrestationsActives().subscribe(data => { this.toutesLesPrestations = data; });
+    // this.tourismeService.getSessionsActives().subscribe(data => { this.toutesLesSessions = data; });
+    
+    this.initialiserCatalogue();
+  }
+
+  initialiserCatalogue(): void {
+    this.extraireVillesDepart();
+    this.filtrerPrestations();
+  }
+
   // 1. LOGIQUE DE LA MODALE POP-UP
-  ouvrirSessions(prestation: any) {
+  ouvrirSessions(prestation: Prestation) {
     this.adorationPrestationSelectionnee = prestation;
     this.modalOuverte = true;
   }
@@ -59,16 +100,16 @@ export class TourismeCatalogue implements OnInit, AfterViewInit {
     this.adorationPrestationSelectionnee = null;
   }
 
-  filtrerSessionsParPrestation(idPrestation: number): any[] {
-    return this.toutesLesSessions.filter(s => s.id_prestation === idPrestation);
+  filtrerSessionsParPrestation(idPrestation: number): Session[] {
+    return this.toutesLesSessions.filter(s => s.idPrestation === idPrestation);
   }
 
   // 2. FILTRES DE RECHERCHE CATALOGUE
   filtrerPrestations() {
     this.prestationsFiltreres = this.toutesLesPrestations.filter(p => {
-      const matchTexte = p.titre_service.toLowerCase().includes(this.rechercheTexte.toLowerCase()) || 
+      const matchTexte = p.titreService.toLowerCase().includes(this.rechercheTexte.toLowerCase()) || 
                          p.description.toLowerCase().includes(this.rechercheTexte.toLowerCase());
-      const matchPrix = p.prix_base <= this.maxPrix;
+      const matchPrix = p.prixBase <= this.maxPrix;
       const matchVille = this.villeSelectionnee === '' || p.metadata?.lieu_depart === this.villeSelectionnee;
 
       return matchTexte && matchPrix && matchVille;
@@ -136,52 +177,7 @@ export class TourismeCatalogue implements OnInit, AfterViewInit {
   private extraireVillesDepart() {
     const villes = this.toutesLesPrestations
       .map(p => p.metadata?.lieu_depart)
-      .filter(v => v !== undefined);
+      .filter((v): v is string => v !== undefined && v !== null);
     this.villesDepart = [...new Set(villes)];
-  }
-
-  // 4. JEUX DE DONNÉES FICTIFS DE RECONSTITUTION
-  private genererDonneesFictives() {
-    const dataBase = [
-      { id_prestation: 9, titre_service: 'Trek & Découverte : Le Nord Sauvage', description: 'Une aventure immersive de Diego-Suarez à Nosy Be, découvrez les Tsingy et la faune locale.', prix_base: 1200.0, metadata: { lieu_depart: 'Diego-Suarez', lieu_arrivee: 'Nosy Be' }},
-      { id_prestation: 10, titre_service: "L'Allée des Baobabs et Majestueux Sud", description: 'Parcours photographique et solidaire à travers Morondava et les parcs nationaux du Sud.', prix_base: 1450.0, metadata: { lieu_depart: 'Morondava', lieu_arrivee: 'Sud-Madagascar' }}
-    ];
-
-    this.toutesLesPrestations = [...dataBase];
-    const villesFictives = ['Antananarivo', 'Fianarantsoa', 'Majunga', 'Tamatave'];
-    
-    for (let i = 11; i <= 60; i++) {
-      const departFictif = villesFictives[i % villesFictives.length];
-      this.toutesLesPrestations.push({
-        id_prestation: i,
-        titre_service: `Circuit Découverte Expérience n°${i}`,
-        description: `Une excursion unique et éco-responsable conçue par Honey Group. Exploration des paysages environnants, guide local francophone inclus et hébergement solidaire en pension complète.`,
-        prix_base: Math.floor(Math.random() * (2500 - 400 + 1)) + 400,
-        metadata: { lieu_depart: departFictif, lieu_arrivee: 'Destination Mystère' }
-      });
-    }
-  }
-
-  private genererSessionsFictives() {
-    // On génère des sessions ouvertes pour les ID 9 et 10, et quelques-unes pour le reste
-    this.toutesLesSessions = [
-      { id_prestation: 9, date_debut: new Date('2026-07-15'), date_fin: new Date('2026-07-28'), capacite_max: 12, nb_inscrits: 4, statut_session: 'OUVERT' },
-      { id_prestation: 9, date_debut: new Date('2026-08-10'), date_fin: new Date('2026-08-23'), capacite_max: 12, nb_inscrits: 12, statut_session: 'COMPLET' },
-      { id_prestation: 10, date_debut: new Date('2026-09-01'), date_fin: new Date('2026-09-14'), capacite_max: 15, nb_inscrits: 10, statut_session: 'OUVERT' }
-    ];
-
-    // Génération automatique pour alimenter les autres circuits du catalogue
-    for (let i = 11; i <= 60; i++) {
-      if (i % 3 !== 0) { // On laisse quelques circuits vides volontairement pour tester l'état vide
-        this.toutesLesSessions.push({
-          id_prestation: i,
-          date_debut: new Date('2026-07-20'),
-          date_fin: new Date('2026-08-03'),
-          capacite_max: 10,
-          nb_inscrits: Math.floor(Math.random() * 10),
-          statut_session: Math.random() > 0.2 ? 'OUVERT' : 'EN_COURS'
-        });
-      }
-    }
   }
 }

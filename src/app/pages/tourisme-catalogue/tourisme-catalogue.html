@@ -1,7 +1,7 @@
 <div class="bg-dark text-white py-5 mb-4" style="background: linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.75)), url('https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?q=80&w=1200') no-repeat center center; background-size: cover;">
   <div class="container py-4 text-center">
     <h1 class="display-5 fw-bold mb-2 text-white shadow-sm">Catalogue des Destinations</h1>
-    <p class="lead text-light text-opacity-90 mb-0">Explorez l'intégralité de nos circuits, treks et séjours d'exception.</p>
+    <p class="lead text-light text-opacity-90 mb-0">Explorez l'intégralité de nos prestations, treks et séjours d'exception.</p>
   </div>
 </div>
 
@@ -52,29 +52,29 @@
       
       <div class="d-flex justify-content-between align-items-center mb-4 bg-light p-3 rounded-3 border border-opacity-10">
         <div class="text-muted small">
-          <strong>{{ prestationsFiltreres.length }}</strong> voyage(s) trouvé(s)
+          <strong>{{ prestationsFiltreres.length }}</strong> prestation(s) trouvée(s)
         </div>
       </div>
 
       <div class="row g-4">
-        @for (prestation of prestationsVisibles; track prestation.id_prestation) {
+        @for (prestation of prestationsVisibles; track prestation.id) {
           <div class="col-md-6 animate-fade-in">
             <div class="card h-100 border-0 shadow-sm catalogue-card overflow-hidden position-relative" (click)="ouvrirSessions(prestation)" style="cursor: pointer;">
               <span class="position-absolute bg-dark text-white fw-bold px-3 py-2 rounded-end shadow-sm" style="top: 15px; left: 0; z-index: 3; font-size: 0.9rem;">
-                {{ prestation.prix_base }} €
+                {{ prestation.prixBase }} €
               </span>
               
               <div class="card-img-top bg-secondary bg-opacity-10 d-flex align-items-center justify-content-center position-relative overflow-hidden" style="height: 200px;">
                 <i class="bi bi-compass text-muted opacity-25 display-4"></i>
                 @if (prestation.metadata?.lieu_depart) {
                   <div class="position-absolute bottom-0 start-0 w-100 p-3 bg-gradient-dark text-white">
-                    <span class="small"><i class="bi bi-geo-alt-fill text-warning me-1"></i>{{ prestation.metadata.lieu_depart }} → {{ prestation.metadata.lieu_arrivee }}</span>
+                    <span class="small"><i class="bi bi-geo-alt-fill text-warning me-1"></i>{{ prestation.metadata?.lieu_depart }} → {{ prestation.metadata?.lieu_arrivee }}</span>
                   </div>
                 }
               </div>
 
               <div class="card-body p-4">
-                <h5 class="card-title fw-bold text-dark mb-2">{{ prestation.titre_service }}</h5>
+                <h5 class="card-title fw-bold text-dark mb-2">{{ prestation.titreService }}</h5>
                 <p class="card-text text-muted small mb-0 line-clamp-3">{{ prestation.description }}</p>
               </div>
 
@@ -88,7 +88,7 @@
         } @empty {
           <div class="col-12 text-center py-5">
             <i class="bi bi-search-heart display-1 text-muted opacity-25 mb-3"></i>
-            <h5 class="fw-bold text-secondary">Aucun circuit ne correspond à vos critères</h5>
+            <h5 class="fw-bold text-secondary">Aucune prestation ne correspond à vos critères</h5>
             <p class="text-muted small">Modifiez vos filtres ou réinitialisez la recherche pour voir d'autres destinations.</p>
           </div>
         }
@@ -97,7 +97,7 @@
       @if (prestationsFiltreres.length > 0 && prestationsVisibles.length < prestationsFiltreres.length) {
         <div #scrollSpy class="text-center py-5 my-3">
           <div class="spinner-border text-primary spinner-border-sm me-2" role="status"></div>
-          <span class="text-muted small">Chargement des destinations suivantes...</span>
+          <span class="text-muted small">Chargement des prestations suivantes...</span>
         </div>
       }
 
@@ -112,7 +112,7 @@
         
         <div class="modal-header bg-dark text-white p-4">
           <h5 class="modal-title fw-bold">
-            <i class="bi bi-calendar3 me-2 text-warning"></i> Sessions : {{ adorationPrestationSelectionnee.titre_service }}
+            <i class="bi bi-calendar3 me-2 text-warning"></i> Sessions : {{ adorationPrestationSelectionnee.titreService }}
           </h5>
           <button type="button" class="btn-close btn-close-white" (click)="fermerSessions()"></button>
         </div>
@@ -134,28 +134,28 @@
                 </tr>
               </thead>
               <tbody>
-                @for (session of filtrerSessionsParPrestation(adorationPrestationSelectionnee.id_prestation); track session.date_debut) {
+                @for (session of filtrerSessionsParPrestation(adorationPrestationSelectionnee.id); track session.id) {
                   <tr>
-                    <td class="fw-semibold">{{ session.date_debut | date:'dd/MM/yyyy' }}</td>
-                    <td class="fw-semibold">{{ session.date_fin | date:'dd/MM/yyyy' }}</td>
+                    <td class="fw-semibold">{{ session.dateDebut | date:'dd/MM/yyyy' }}</td>
+                    <td class="fw-semibold">{{ session.dateFin | date:'dd/MM/yyyy' }}</td>
                     <td class="text-center">
-                      <span class="fw-bold">{{ session.capacite_max - session.nb_inscrits }}</span> / {{ session.capacite_max }}
+                      <span class="fw-bold">{{ session.capaciteMax - session.nbInscrits }}</span> / {{ session.capaciteMax }}
                     </td>
                     <td class="text-center">
-                      @if (session.statut_session === 'OUVERT') {
+                      @if (session.statutSession === 'OUVERT') {
                         <span class="badge bg-success px-2.5 py-1.5">Disponible</span>
-                      } @else if (session.statut_session === 'EN_COURS') {
+                      } @else if (session.statutSession === 'EN_COURS') {
                         <span class="badge bg-warning text-dark px-2.5 py-1.5">En cours</span>
                       } @else {
                         <span class="badge bg-danger px-2.5 py-1.5">Complet</span>
                       }
                     </td>
                     <td class="text-end">
-                        <button class="btn btn-sm btn-primary px-3" 
-                            [disabled]="session.statut_session !== 'OUVERT'"
-                            [routerLink]="['/tourisme/reservation', session.id_prestation]">
-                             Réserver
-                        </button>
+                      <button class="btn btn-sm btn-primary px-3" 
+                              [disabled]="session.statutSession !== 'OUVERT'"
+                              [routerLink]="['/tourisme/reservation', session.id]">
+                        Réserver
+                      </button>
                     </td>
                   </tr>
                 } @empty {
