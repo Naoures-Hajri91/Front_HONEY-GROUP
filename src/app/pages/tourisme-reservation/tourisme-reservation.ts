@@ -1,37 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-
-// Alignement strict avec l'entité Java Prestation.java
-export interface Prestation {
-  id: number; // private Long id;
-  titreService: string; // private String titreService;
-  description: string; // private String description;
-  prixBase: number; // private Double prixBase;
-  metadata?: {
-    lieu_depart?: string;
-    lieu_arrivee?: string;
-  };
-  statut: string; // private StatutPrestation statut;
-  dateCreation?: string | Date; // private LocalDateTime dateCreation;
-}
-
-// Alignement strict avec l'entité Java Session.java
-export interface Session {
-  id: number; // private Long id;
-  dateDebut: Date | string; // private LocalDateTime dateDebut;
-  dateFin: Date | string; // private LocalDateTime dateFin;
-  capaciteMax: number; // private Integer capaciteMax;
-  nbInscrits: number; // private Integer nbInscrits;
-  statutSession: string; // private StatutSession statutSession;
-}
-
-export enum TypePayment {
-  VIREMENT_BANCAIRE = 'VIREMENT_BANCAIRE',
-  MOBILE_MONEY = 'MOBILE_MONEY',
-  PAYPAL = 'PAYPAL',
-  CARTE_BANCAIRE = 'CARTE_BANCAIRE'
-}
+import { TourismeService, Prestation, Session, BookingRequest } from '../../services/tourisme';
+import { TypePayment } from '../../models/payment';
+import { TypeReservation } from '../../models/reservation';
 
 @Component({
   selector: 'app-tourisme-reservation',
@@ -43,10 +15,17 @@ export enum TypePayment {
 
 export class TourismeReservation implements OnInit {
 
+  // Injection moderne des dépendances d'Angular
+  private route = inject(ActivatedRoute);
+  private tourismeService = inject(TourismeService);
+
+  // Passerelle pour rendre l'énumération accessible dans le fichier HTML
+  protected readonly TypePayment = TypePayment;
+
   quantite: number = 1;
-  modeSelectionne: keyof typeof TypePayment = 'CARTE_BANCAIRE'; // Mode par défaut
+  modeSelectionne: TypePayment = TypePayment.CARTE_BANCAIRE; // Initialisation propre et typée via l'enum
   
-  // Objets d'API initialisés proprement à null (Zéro données en dur)
+  // Objets d'API initialisés proprement à null (Le catalogue commence à blanc)
   prestation: Prestation | null = null;
   sessionSelectionnee: Session | null = null;
   placesRestantes: number = 0;
@@ -54,9 +33,7 @@ export class TourismeReservation implements OnInit {
   // Modales légales
   modalLegaleOuverte: boolean = false;
   titreModalLegale: 'remboursement' | 'confidentialite' | 'conditions' | '' = '';
-
-  constructor(private route: ActivatedRoute) {}
-
+  
   ngOnInit(): void {
     const idSessionParam = this.route.snapshot.paramMap.get('idSession');
     const idSession = idSessionParam ? parseInt(idSessionParam, 10) : null;
@@ -67,27 +44,37 @@ export class TourismeReservation implements OnInit {
   }
 
   /**
-   * Point de connexion pour requêter ton contrôleur Spring Boot
+   * Se connecte au service en exploitant les endpoints ciblés de ton API Spring Boot
    */
   chargerDonneesSession(idSession: number): void {
-    // TODO: Appel de ton service HTTP
-    // Exemple de traitement attendu :
-    // this.tourismeService.getSessionDetail(idSession).subscribe(res => {
-    //   this.sessionSelectionnee = res.session;
-    //   this.prestation = res.prestation;
-    //   // Calcul basé sur les attributs réels de l'entité Session :
-    //   this.placesRestantes = res.session.capaciteMax - res.session.nbInscrits;
-    // });
+    // 1. Récupération directe de LA session via son ID unique
+    this.tourismeService.getSessionById(idSession).subscribe({
+      next: (session: Session) => {
+        this.sessionSelectionnee = session;
+        this.placesRestantes = session.capaciteMax - session.nbInscrits;
+
+        // 2. Récupération directe de LA prestation correspondante
+        if (session.idPrestation) {
+          this.tourismeService.getPrestationById(session.idPrestation).subscribe({
+            next: (prestation: Prestation) => {
+              this.prestation = prestation;
+            },
+            error: (err) => console.error('Erreur lors du chargement de la prestation', err)
+          });
+        }
+      },
+      error: (err) => console.error('Erreur lors du chargement de la session', err)
+    });
   }
 
-  changerQuantite(valeur: number) {
+  changerQuantite(valeur: number): void {
     const nouvelleQte = this.quantite + valeur;
     if (nouvelleQte >= 1 && nouvelleQte <= this.placesRestantes) {
       this.quantite = nouvelleQte;
     }
   }
 
-  selectionnerMode(mode: keyof typeof TypePayment) {
+  selectionnerMode(mode: TypePayment): void {
     this.modeSelectionne = mode;
   }
 
@@ -95,14 +82,41 @@ export class TourismeReservation implements OnInit {
     return this.prestation ? this.prestation.prixBase * this.quantite : 0;
   }
 
-  ouvrirModalLegale(type: 'remboursement' | 'confidentialite' | 'conditions') {
+  ouvrirModalLegale(type: 'remboursement' | 'confidentialite' | 'conditions'): void {
     this.titreModalLegale = type;
     this.modalLegaleOuverte = true;
   }
 
-  fermerModalLegale() {
+  fermerModalLegale(): void {
     this.modalLegaleOuverte = false;
     this.titreModalLegale = '';
   }
-}
 
+  /**
+   * Envoie la demande de réservation finale au backend Spring Boot
+   */
+  confirmerReservation(): void {
+    if (!this.sessionSelectionnee) {
+      alert("Impossible de réserver, aucune session n'est sélectionnée.");
+      return;
+    }
+
+    // Construction du DTO conforme à ton entité Java BookingRequest
+    const payload: BookingRequest = {
+      sessionId: this.sessionSelectionnee.id,
+      nbPersonnes: this.quantite,
+      typeReservation: TypeReservation.SESSION // Fixé sur SESSION pour le catalogue écotourisme
+    };
+
+    this.tourismeService.creerReservation(payload).subscribe({
+      next: (response) => {
+        console.log('Réservation sandbox validée !', response);
+        alert('Félicitations, votre réservation a bien été enregistrée !');
+      },
+      error: (err) => {
+        console.error("Erreur lors de la création de la réservation", err);
+        alert("Une erreur est survenue lors de la validation. Veuillez réessayer.");
+      }
+    });
+  }
+}

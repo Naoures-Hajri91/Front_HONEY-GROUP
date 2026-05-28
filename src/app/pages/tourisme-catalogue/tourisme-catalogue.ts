@@ -1,32 +1,8 @@
-import { Component, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-
-export interface PrestationMetadata {
-  id_metadata?: number; // Clé spécifique à ton convertisseur ou ta table metadata si existante
-  lieu_depart: string;
-  lieu_arrivee: string;
-}
-
-export interface Prestation {
-  id: number; // Mappé sur private Long id;
-  titreService: string; // Mappé sur private String titreService;
-  description: string; // Mappé sur private String description;
-  prixBase: number; // Mappé sur private Double prixBase;
-  metadata?: PrestationMetadata; // Mappé sur private Map<String, Object> metadata;
-  statut: string; // Mappé sur private StatutPrestation statut;
-}
-
-export interface Session {
-  id: number; // Mappé sur private Long id;
-  dateDebut: Date | string; // Mappé sur private LocalDateTime dateDebut;
-  dateFin: Date | string; // Mappé sur private LocalDateTime dateFin;
-  capaciteMax: number; // Mappé sur private Integer capaciteMax;
-  nbInscrits: number; // Mappé sur private Integer nbInscrits;
-  statutSession: 'OUVERT' | 'COMPLET' | 'EN_COURS' | 'CLOTURE' | 'ANNULE'; // Mappé sur private StatutSession statutSession;
-  idPrestation: number; // Clé ou ID de l'objet Prestation associé lors de la sérialisation REST
-}
+import { TourismeService, Prestation, Session } from '../../services/tourisme';
 
 @Component({
   selector: 'app-tourisme-catalogue',
@@ -37,9 +13,12 @@ export interface Session {
 })
 export class TourismeCatalogue implements OnInit, AfterViewInit {
 
+  // Injection moderne du service écotourisme
+  private tourismeService = inject(TourismeService);
+
   @ViewChild('scrollSpy') scrollSpy!: ElementRef;
 
-  // Données globales issues de la BDD
+  // Données globales issues de la BDD Honey Group
   toutesLesPrestations: Prestation[] = [];
   toutesLesSessions: Session[] = []; 
   villesDepart: string[] = [];
@@ -57,12 +36,11 @@ export class TourismeCatalogue implements OnInit, AfterViewInit {
   maxPrix: number = 3000;
   villeSelectionnee: string = '';
 
-  // Pagination
+  // Pagination / Infinite Scroll
   itemsParPage: number = 6;
   pageActuelle: number = 1;
   private observer!: IntersectionObserver;
 
-  constructor() {}
 
   ngOnInit(): void {
     this.chargerDonneesDepuisServeur();
@@ -73,15 +51,25 @@ export class TourismeCatalogue implements OnInit, AfterViewInit {
   }
 
   /**
-   * Méthode à interconnecter avec ton service API (ex: `this.tourismeService.getPrestations().subscribe(...)`)
+   * Consomme simultanément les requêtes HTTP de ton backend Spring Boot
    */
   chargerDonneesDepuisServeur(): void {
-    // TODO: Alimenter ces tableaux via des appels API de ton service HTTP depuis Spring Boot
-    // Exemples :
-    // this.tourismeService.getPrestationsActives().subscribe(data => { this.toutesLesPrestations = data; });
-    // this.tourismeService.getSessionsActives().subscribe(data => { this.toutesLesSessions = data; });
-    
-    this.initialiserCatalogue();
+    // 1. Récupération des sessions (pour alimenter les pop-ups de réservation du catalogue)
+    this.tourismeService.getSessions().subscribe({
+      next: (sessions: Session[]) => {
+        this.toutesLesSessions = sessions;
+        
+        // 2. Une fois les sessions prêtes, on récupère le catalogue de prestations
+        this.tourismeService.getPrestations().subscribe({
+          next: (prestations: Prestation[]) => {
+            this.toutesLesPrestations = prestations;
+            this.initialiserCatalogue();
+          },
+          error: (err) => console.error('Erreur lors du chargement des prestations', err)
+        });
+      },
+      error: (err) => console.error('Erreur lors du chargement des sessions', err)
+    });
   }
 
   initialiserCatalogue(): void {

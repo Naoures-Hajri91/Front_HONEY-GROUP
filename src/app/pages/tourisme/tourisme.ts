@@ -1,32 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-
-// Réutilisation des interfaces alignées sur ton backend Spring Boot
-export interface PrestationMetadata {
-  id_metadata?: number;
-  lieu_depart: string;
-  lieu_arrivee: string;
-}
-
-export interface Prestation {
-  id: number; // private Long id;
-  titreService: string; // private String titreService;
-  description: string; // private String description;
-  prixBase: number; // private Double prixBase;
-  metadata?: PrestationMetadata;
-  statut: string; // private StatutPrestation statut;
-}
-
-export interface Session {
-  id: number; // private Long id;
-  dateDebut: Date | string; // private LocalDateTime dateDebut;
-  dateFin: Date | string; // private LocalDateTime dateFin;
-  capaciteMax: number; // private Integer capaciteMax;
-  nbInscrits: number; // private Integer nbInscrits;
-  statutSession: 'OUVERT' | 'COMPLET' | 'EN_COURS' | 'CLOTURE' | 'ANNULE';
-  idPrestation: number; // ID de la prestation associée pour le filtrage
-}
+import { TourismeService, Prestation, Session } from '../../services/tourisme';
 
 @Component({
   selector: 'app-tourisme',
@@ -38,7 +13,10 @@ export interface Session {
 
 export class Tourisme implements OnInit {
   
-  // Tableaux de données initialisés vides, en attente de la BDD
+  // Injection moderne de ton service écotourisme
+  private tourismeService = inject(TourismeService);
+
+  // Tableaux de données alimentés par la BDD de Honey Group
   prestationsTourisme: Prestation[] = [];
   listeSessions: Session[] = [];
 
@@ -46,35 +24,47 @@ export class Tourisme implements OnInit {
   modalOuverte: boolean = false;
   prestationSelectionnee: Prestation | null = null;
 
-  constructor() {}
-
+  
   ngOnInit(): void {
     this.chargerDonneesPoleTourisme();
   }
 
   /**
-   * Méthode à interconnecter avec ton service API pour Honey Group
+   * Consomme les endpoints de ton API Spring Boot pour initialiser la page d'accueil du pôle
    */
   chargerDonneesPoleTourisme(): void {
-    // TODO: Appel de ton service HTTP (ex: filtré sur l'id_pole = 2 ou via un endpoint dédié)
-    // Example:
-    // this.tourismeService.getPrestationsByPole(2).subscribe(data => this.prestationsTourisme = data);
-    // this.tourismeService.getSessionsActives().subscribe(data => this.listeSessions = data);
+    // 1. Récupération de l'ensemble des sessions pour la modale
+    this.tourismeService.getSessions().subscribe({
+      next: (sessions: Session[]) => {
+        this.listeSessions = sessions;
+
+        // 2. Récupération des prestations du catalogue
+        this.tourismeService.getPrestations().subscribe({
+          next: (prestations: Prestation[]) => {
+            // Optionnel : Si tu veux afficher uniquement les 3 premières sur la page d'accueil,
+            // tu peux faire : this.prestationsTourisme = prestations.slice(0, 3);
+            this.prestationsTourisme = prestations;
+          },
+          error: (err) => console.error('Erreur lors du chargement des prestations (accueil)', err)
+        });
+      },
+      error: (err) => console.error('Erreur lors du chargement des sessions (accueil)', err)
+    });
   }
 
   // Ouvre la pop-up et stocke la prestation cliquée
-  ouvrirSessions(prestation: Prestation) {
+  ouvrirSessions(prestation: Prestation): void {
     this.prestationSelectionnee = prestation;
     this.modalOuverte = true;
   }
 
   // Ferme la pop-up
-  fermerSessions() {
+  fermerSessions(): void {
     this.modalOuverte = false;
     this.prestationSelectionnee = null;
   }
 
-  // Filtre les sessions qui appartiennent à la prestation sélectionnée (basé sur p.id et s.idPrestation)
+  // Filtre les sessions qui appartiennent à la prestation sélectionnée
   filtrerSessionsParPrestation(prestationId: number): Session[] {
     return this.listeSessions.filter(s => s.idPrestation === prestationId);
   }
