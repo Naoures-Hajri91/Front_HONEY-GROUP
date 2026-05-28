@@ -1,0 +1,147 @@
+<app-header></app-header>
+
+<!-- HERO SECTION -->
+<section class="hero-section">
+  <div class="hero-container">
+    <div class="hero-text-block">
+      <span class="badge">🎓 Honey Language Center</span>
+      <h1>Pôle <span style="color: #f4b400;">Formation</span> Professionnelle</h1>
+      <p class="hero-subtitle">
+        Développez vos compétences linguistiques, ouvrez-vous au monde !
+      </p>
+      <div class="hero-actions">
+        <a href="https://wa.me/261340000000" target="_blank" class="btn-whatsapp">
+          <i class="fab fa-whatsapp"></i> Rejoindre la session WhatsApp
+        </a>
+        <a [routerLink]="['/devis', 'Formation']" class="btn-devis-nav">
+          Obtenir un Devis Gratuit
+        </a>
+      </div>
+    </div>
+    <div class="hero-image-block">
+      <div class="glass-frame">
+        <img [src]="heroImage" alt="Espace de formation générale Honey Group" class="hero-image">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GRID DES LANGUES -->
+<section class="languages-section">
+  <div class="section-header">
+    <h2>Nos Langues</h2>
+    <p>Une grille uniforme conçue pour un apprentissage pratique et professionnalisant.</p>
+  </div>
+
+  <div class="languages-grid">
+    @for (lang of languages; track lang.name) {
+      <div class="language-card">
+        <div class="image-wrapper">
+          <img [src]="lang.image" [alt]="lang.name" class="lang-image">
+        </div>
+        <img [src]="lang.flagIcon" [alt]="lang.name" class="flag-badge-img">
+        <div class="card-content">
+          <h3>{{ lang.name }}</h3>
+          <p class="tagline">"{{ lang.tagline }}"</p>
+          <p class="description">{{ lang.description }}</p>
+          <div class="card-footer">
+            <a [routerLink]="['/devis', 'Formation']" class="card-btn">S'inscrire à ce pôle ›</a>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</section>
+
+<!-- VIDEOS ET DEMONSTRATIONS -->
+<section class="videos-section">
+  <div class="section-header">
+    <h2>Vidéos & Démonstrations</h2>
+    <p>Découvrez notre méthodologie immersive à travers ces démonstrations interactives de nos cours.</p>
+  </div>
+
+  <div class="videos-container">
+    <!-- BLOC ANGLAIS -->
+    <div class="video-card">
+      <div class="video-header">
+        <span class="video-lang">
+          <img src="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/flags/1x1/gb.svg" alt="UK Flag" class="video-flag-img">
+          Anglais Professionnel
+        </span>
+      </div>
+      <div class="video-wrapper">
+        <iframe 
+          [src]="englishVideoUrl" 
+          title="Cours d'Anglais Honey Language Center" 
+          frameborder="0" 
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+          allowfullscreen>
+        </iframe>
+      </div>
+      <div class="video-body">
+        <p>Immersion en anglais des affaires, vocabulaire technique et conduite de réunions internationales.</p>
+      </div>
+    </div>
+
+    <!-- BLOC MANDARIN -->
+    <div class="video-card">
+      <div class="video-header">
+        <span class="video-lang">
+          <img src="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/flags/1x1/cn.svg" alt="China Flag" class="video-flag-img">
+          Pôle Mandarin (Chinois)
+        </span>
+      </div>
+      <div class="video-wrapper">
+        <iframe 
+          [src]="mandarinVideoUrl" 
+          title="Cours de Mandarin Honey Language Center" 
+          frameborder="0" 
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+          allowfullscreen>
+        </iframe>
+      </div>
+      <div class="video-body">
+        <p>Découverte de la prononciation, des tons fondamentaux et de l’étiquette des affaires en Chine.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CALL TO ACTION ET FOOTER CENTRALISE -->
+<section class="cta-section">
+  <div class="cta-glass-box">
+    <!-- LOGO HONEY GROUP -->
+    <div class="logo-container">
+      <img [src]="logoPath" alt="Logo Officiel Honey Group" class="honey-logo">
+    </div>
+    
+    <h2>Rejoignez le Honey Language Center dès aujourd'hui</h2>
+    <p>
+      Que vous soyez étudiant, salarié ou chef d’entreprise, nos formations s'adaptent à votre emploi du temps et à vos objectifs professionnels.
+    </p>
+    
+    <div class="cta-buttons">
+      <a href="https://wa.me/261340000000" target="_blank" class="btn-whatsapp-pulse">
+        💬 Nous contacter sur WhatsApp
+      </a>
+      <a [routerLink]="['/register']" class="btn-register-solid">
+        📝 S'inscrire à la plateforme
+      </a>
+    </div>
+
+    <!-- RESEAUX SOCIAUX -->
+    <div class="social-links-block">
+      <a href="https://www.linkedin.com" target="_blank" class="social-icon li" title="LinkedIn">
+        <i class="fab fa-linkedin-in"></i> LinkedIn
+      </a>
+      <a href="https://www.tiktok.com" target="_blank" class="social-icon tt" title="TikTok">
+        <i class="fab fa-tiktok"></i> TikTok
+      </a>
+      <a href="https://www.instagram.com" target="_blank" class="social-icon ig" title="Instagram">
+        <i class="fab fa-instagram"></i> Instagram
+      </a>
+    </div>
+  </div>
+</section>
+
+<app-footer></app-footer>

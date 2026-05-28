@@ -113,6 +113,6 @@ export class Home implements OnInit {
     }
 
     // 📚 FORMATION
-    this.router.navigate(['/devis', poleName]);
+    this.router.navigate(['/formation']);
   }
 }
