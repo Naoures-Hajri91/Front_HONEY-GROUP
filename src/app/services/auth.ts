@@ -1,6 +1,8 @@
-import {inject, Injectable} from '@angular/core';
+import {inject, Injectable, signal} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
-import {Observable} from 'rxjs';
+import {Observable, tap} from 'rxjs';
+import { Role } from '../models/role'; // Assurez-vous que Role est importé si ce n'est pas déjà fait
+import { ProfileUpdatePayload, UserProfile } from '../models/user-profile';
 
 @Injectable({
   providedIn: 'root',
@@ -10,6 +12,9 @@ export class Auth {
 
   private apiUrl = 'https://api.honeygroupitmada.com/api/auth';
   private apiAuth = 'https://api.honeygroupitmada.com/api/users';
+
+  // Signal pour accéder au profil n'importe où sans refaire d'appel HTTP
+  currentUser = signal<UserProfile | null>(null);
 
   register(data: any) {
     return this.http.post(`${this.apiUrl}/register`, data);
@@ -28,8 +33,26 @@ export class Auth {
   }
 
   // ✅ CURRENT USER
-  getCurrentUser() {
-    return this.http.get<any>(`${this.apiAuth}/me`);
+  getCurrentUser(): Observable<UserProfile> {
+    return this.http.get<UserProfile>(`${this.apiAuth}/me`).pipe(
+      tap(user => this.currentUser.set(user))
+    );
+  }
+
+  /**
+   * Récupère tous les utilisateurs pour le personnel (ADMIN/MANAGER).
+   * Nécessite un endpoint backend protégé, par exemple /api/users/all.
+   */
+  getAllUsersForStaff(): Observable<UserProfile[]> {
+    return this.http.get<UserProfile[]>(`${this.apiAuth}/clients`);
+  }
+
+  updateProfile(payload: ProfileUpdatePayload): Observable<UserProfile> {
+    return this.http.put<UserProfile>(`${this.apiAuth}/me/profile`, payload);
+  }
+
+  forgotPassword(email: string): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/forgot-password`, { email });
   }
 
   isAuthenticated(): boolean {

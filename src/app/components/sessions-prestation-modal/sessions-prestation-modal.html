@@ -1,0 +1,197 @@
+@if (ouverte && prestation) {
+  <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);" role="dialog" aria-modal="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl" style="max-width: 90vw;" role="document">
+      <div class="modal-content border-0 shadow-lg">
+        <div
+          class="modal-header text-white p-4"
+          [style.background]="
+            prestation.imageUrl
+              ? 'linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.75)), url(' + prestation.imageUrl + ') no-repeat center center / cover'
+              : 'linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.75)), url(https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?q=80&w=1200) no-repeat center center / cover'
+          "
+        >
+          <div class="w-100">
+            <h5 class="modal-title fw-bold mb-2">Sessions : {{ prestation.titreService }}</h5>
+            <p class="text-light text-opacity-75 small mb-0">{{ prestation.description }}</p>
+          </div>
+          <button type="button" class="btn-close btn-close-white" (click)="fermerModal()"></button>
+        </div>
+
+        <div class="modal-body p-4">
+          <div class="row g-2 mb-4 align-items-end bg-light p-3 rounded-3">
+            <div class="col-md-3">
+              <label class="small fw-bold">Statut</label>
+              <select class="form-select form-select-sm" [(ngModel)]="filtreStatut" (change)="appliquerFiltresSession()">
+                <option value="">Tous</option>
+                <option value="OUVERT">Disponible (Ouvert)</option>
+                <option value="COMPLET">Complet</option>
+                <option value="EN_COURS">En cours</option>
+                <option value="CLOTURE">Clôturé</option>
+                <option value="ANNULE">Annulé</option>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <label class="small fw-bold">Places min.</label>
+              <input
+                type="number"
+                class="form-control form-control-sm"
+                min="0"
+                [(ngModel)]="filtrePlaces"
+                (input)="appliquerFiltresSession()"
+              />
+            </div>
+            <div class="col-md-3">
+              <label class="small fw-bold">Date min.</label>
+              <input
+                type="date"
+                class="form-control form-control-sm"
+                [(ngModel)]="filtreDateDebut"
+                (change)="appliquerFiltresSession()"
+              />
+            </div>
+            <div class="col-md-4 text-end">
+              <small class="text-muted">{{ sessionsFiltrees.length }} session(s) trouvée(s)</small>
+            </div>
+          </div>
+
+          @if (chargementSessions) {
+            <div class="text-center py-5 text-muted">
+              <div class="spinner-border text-primary" role="status"></div>
+              <p class="mt-3 mb-0">Chargement des sessions…</p>
+            </div>
+          } @else if (erreurSessions) {
+            <div class="alert alert-danger mb-0">
+              Impossible de charger les sessions.
+              <button type="button" class="btn btn-sm btn-outline-danger ms-2" (click)="chargerSessionsSiPossible()">
+                Réessayer
+              </button>
+            </div>
+          } @else {
+            <div class="table-responsive">
+              <table class="table table-hover align-middle">
+                <thead class="table-light">
+                  <tr>
+                    <th>Départ</th>
+                    <th>Retour</th>
+                    <th class="text-center">Capacité</th>
+                    <th class="text-center">Disponible</th>
+                    <th class="text-center">Remplissage</th>
+                    <th class="text-center">Statut</th>
+                    <th class="text-end">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (session of sessionsPaginees; track session.id) {
+                    <tr>
+                      <td><strong>{{ session.dateDebut | date: 'dd/MM/yyyy HH:mm' }}</strong></td>
+                      <td>{{ session.dateFin | date: 'dd/MM/yyyy HH:mm' }}</td>
+                      <td class="text-center">
+                        <span class="badge bg-info">{{ session.capaciteMax }}</span>
+                      </td>
+                      <td class="text-center">
+                        <span
+                          [ngClass]="{
+                            'text-success fw-bold': placesRestantes(session) > 0,
+                            'text-danger fw-bold': placesRestantes(session) === 0,
+                          }"
+                        >
+                          {{ placesRestantes(session) }} / {{ session.capaciteMax }}
+                        </span>
+                      </td>
+                      <td class="text-center">
+                        <div class="progress" style="height: 20px; width: 100px; margin: 0 auto">
+                          <div
+                            class="progress-bar"
+                            [ngClass]="{
+                              'bg-success': pourcentageRemplissage(session) < 75,
+                              'bg-warning': pourcentageRemplissage(session) >= 75 && pourcentageRemplissage(session) < 100,
+                              'bg-danger': pourcentageRemplissage(session) >= 100,
+                            }"
+                            [style.width.%]="pourcentageRemplissage(session)"
+                            role="progressbar"
+                          >
+                            {{ pourcentageRemplissage(session) }}%
+                          </div>
+                        </div>
+                      </td>
+                      <td class="text-center">
+                        <span
+                          class="badge"
+                          [ngClass]="{
+                            'bg-success': statutNormalise(session) === 'OUVERT',
+                            'bg-warning text-dark': statutNormalise(session) === 'COMPLET',
+                            'bg-info': statutNormalise(session) === 'EN_COURS',
+                            'bg-secondary': statutNormalise(session) === 'CLOTURE',
+                            'bg-danger': statutNormalise(session) === 'ANNULE',
+                          }"
+                        >
+                          {{ statutNormalise(session) }}
+                        </span>
+                      </td>
+                      <td class="text-end">
+                        <button
+                          type="button"
+                          class="btn btn-sm btn-primary"
+                          [disabled]="!sessionReservable(session)"
+                          [routerLink]="['/tourisme/reservation', session.id]"
+                        >
+                          Réserver
+                        </button>
+                      </td>
+                    </tr>
+                  } @empty {
+                    <tr>
+                      <td colspan="7" class="text-center py-4 text-muted">
+                        Aucune session planifiée pour le moment.
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+
+          @if (sessionsFiltrees.length > itemsParPageSession) {
+            <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+              <div class="text-muted small">
+                Affichage {{ (pageSession - 1) * itemsParPageSession + 1 }} à
+                {{ Math.min(pageSession * itemsParPageSession, sessionsFiltrees.length) }}
+                sur {{ sessionsFiltrees.length }} session(s)
+              </div>
+              <div>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-primary"
+                  [disabled]="pageSession === 1"
+                  (click)="pageSession = pageSession - 1"
+                >
+                  <i class="bi bi-chevron-left"></i> Précédent
+                </button>
+                <span class="align-self-center px-3"
+                  >Page {{ pageSession }} / {{ Math.ceil(sessionsFiltrees.length / itemsParPageSession) }}</span
+                >
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-primary"
+                  [disabled]="pageSession * itemsParPageSession >= sessionsFiltrees.length"
+                  (click)="pageSession = pageSession + 1"
+                >
+                  Suivant <i class="bi bi-chevron-right"></i>
+                </button>
+              </div>
+            </div>
+          }
+
+          @if (sessionsFiltrees.length === 0 && toutesLesSessions.length > 0) {
+            <div class="alert alert-info mt-4" role="alert">
+              <i class="bi bi-info-circle me-2"></i> Aucune session ne correspond à vos critères de filtrage.
+            </div>
+          }
+        </div>
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-secondary" (click)="fermerModal()">Fermer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

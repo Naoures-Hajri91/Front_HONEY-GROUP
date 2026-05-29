@@ -1,0 +1,49 @@
+/* Style des boutons d'ajustement ronds */
+.circle-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+/* Style de sélection des blocs radio de paiement */
+.payment-option {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.payment-option:hover {
+  background-color: #f8fafc;
+}
+
+.bg-selected {
+  background-color: #f1f5f9 !important;
+  border-left: 3px solid #0f172a; /* Bordure d'accentuation sur le côté */
+}
+
+/* Animation fluide pour l'apparition des sous-formulaires */
+.animate-slide-down {
+  animation: slideDown 0.25s ease-out forwards;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hover-dark {
+  transition: color 0.2s ease-in-out;
+}
+
+.hover-dark:hover {
+  color: #0f172a !important;
+  text-decoration: underline !important;
+}

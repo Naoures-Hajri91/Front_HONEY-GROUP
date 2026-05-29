@@ -1,0 +1,50 @@
+/* Design et effets sur les cartes du catalogue */
+.catalogue-card {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+  border-radius: 12px;
+}
+
+.catalogue-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Dégradé sombre pour le texte par-dessus l'emplacement image */
+.bg-gradient-dark {
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.3) 70%, rgba(0, 0, 0, 0) 100%);
+}
+
+/* Limiter la description à 3 lignes proprement */
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;  
+  overflow: hidden;
+}
+
+/* Utilitaires de taille de texte */
+.x-small {
+  font-size: 0.75rem;
+}
+
+/* Animation douce à l'apparition des nouvelles cartes chargées */
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Rendre le conteneur collant des filtres adaptatif (ne dépasse pas le viewport) */
+.sticky-top {
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+}

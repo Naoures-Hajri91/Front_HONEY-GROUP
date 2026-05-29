@@ -165,7 +165,7 @@
         <!-- LOGIN LINK -->
         <p class="login-link">
           Déjà un compte ?
-          <a routerLink="/login">Se connecter</a>
+          <a [routerLink]="['/login']" [queryParams]="loginQueryParams">Se connecter</a>
         </p>
 
       </form>

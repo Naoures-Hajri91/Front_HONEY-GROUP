@@ -1,5 +1,5 @@
-import { Component, inject } from '@angular/core';
-import { Router, RouterModule } from '@angular/router';
+import { Component, inject, OnInit } from '@angular/core';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Auth } from '../../services/auth';
 import { ToastrService } from 'ngx-toastr';
@@ -12,17 +12,49 @@ import { CommonModule } from '@angular/common';
   templateUrl: './login.html',
   styleUrl: './login.css',
 })
-export class Login {
+export class Login implements OnInit {
 
   private fb = inject(FormBuilder);
   private authService = inject(Auth);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private toastr = inject(ToastrService);
+
+  /** Message affiché lorsqu'une réservation attend une connexion. */
+  connexionPourReservation = false;
+
+  /** Query params transmis au lien d'inscription. */
+  registerQueryParams: { returnUrl?: string } = {};
 
   loginForm: FormGroup = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(6)]]
   });
+
+  ngOnInit(): void {
+    if (this.authService.isAuthenticated()) {
+      this.router.navigate(['/mon-compte']);
+      return;
+    }
+
+    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+
+    if (returnUrl?.startsWith('/')) {
+      this.registerQueryParams = { returnUrl };
+      this.connexionPourReservation = returnUrl.includes('/tourisme/reservation');
+    }
+  }
+
+  private navigateAfterAuth(): void {
+    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+
+    if (returnUrl?.startsWith('/')) {
+      this.router.navigateByUrl(returnUrl);
+      return;
+    }
+
+    this.router.navigate(['/']);
+  }
 
   onSubmit(): void {
 
@@ -46,7 +78,7 @@ export class Login {
 
         this.toastr.success('Connexion réussie 🎉');
 
-        this.router.navigate(['/']);
+        this.navigateAfterAuth();
       },
 
       error: (err: any) => {

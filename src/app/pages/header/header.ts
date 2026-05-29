@@ -1,5 +1,5 @@
-import {ChangeDetectorRef, Component, inject, OnInit} from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { ChangeDetectorRef, Component, inject, OnInit, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Auth } from '../../services/auth';
 
@@ -16,40 +16,24 @@ export class Header implements OnInit {
 
   private authService = inject(Auth);
   private cd = inject(ChangeDetectorRef);
+  private platformId = inject(PLATFORM_ID);
 
   user: any = null;
 
   ngOnInit(): void {
-
-    console.log("HEADER INIT");
-
-    // ✅ PROTECTION SSR
-    if (typeof window === 'undefined') {
+    if (!isPlatformBrowser(this.platformId) || !this.authService.isAuthenticated()) {
       return;
     }
 
-    const token = localStorage.getItem('accessToken');
-
-    console.log("TOKEN =", token);
-
-    if (token) {
-
-      this.authService.getCurrentUser().subscribe({
-
-        next: (data) => {
-          this.user = data;
-          console.log("USER =", this.user);
-          this.cd.detectChanges(); // 🔥 FORCE UPDATE UI
-        },
-
-        error: (err) => {
-          console.log("ERROR /me =", err);
-          this.user = null;
-        }
-
-      });
-
-    }
+    this.authService.getCurrentUser().subscribe({
+      next: (data) => {
+        this.user = data;
+        this.cd.markForCheck();
+      },
+      error: () => {
+        this.user = null;
+      },
+    });
   }
 
   logout(): void {

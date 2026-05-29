@@ -1,6 +1,4 @@
 import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
-import { Header } from '../header/header';
-import { Footer } from '../footer/footer';
 import { Poles } from '../../services/poles';
 import {Router, RouterLink} from '@angular/router';
 
@@ -8,8 +6,6 @@ import {Router, RouterLink} from '@angular/router';
   selector: 'app-home',
   standalone: true,
   imports: [
-    Header,
-    Footer,
     RouterLink
   ],
   templateUrl: './home.html',
@@ -90,14 +86,9 @@ export class Home implements OnInit {
       return;
     }
 
-    // 💻 IT
+    // 💻 IT — catalogue & devis sur le portail unifié
     if (p.includes('it') || p.includes('digital')) {
-
-      window.open(
-        'https://www.honeygroupitmada.com/',
-        '_blank'
-      );
-
+      this.router.navigate(['/it-digital']);
       return;
     }
 

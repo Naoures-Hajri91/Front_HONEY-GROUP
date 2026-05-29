@@ -1,0 +1,170 @@
+<div class="bg-dark text-white py-5 mb-5" style="background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=1200') no-repeat center center; background-size: cover;">
+  <div class="container py-5 text-center">
+    <h1 class="display-3 fw-bold mb-3">Pôle Tourisme</h1>
+    <p class="lead mb-4 fs-4">Façonner des expériences de voyage uniques et des solutions de gestion d'exception.</p>
+    <div class="mx-auto" style="width: 60px; height: 3px; background-color: #ffc107;"></div>
+  </div>
+</div>
+
+<div class="container">
+  
+  <div class="row align-items-center mb-5 pb-4">
+    <div class="col-lg-6 mb-4 mb-lg-0">
+      <span class="text-primary fw-bold text-uppercase tracking-wider">Notre Vision</span>
+      <h2 class="mt-2 mb-4 fw-bold">L'expertise au service de vos évasions</h2>
+      <p class="text-muted justify-content-center">
+        Honey Group accompagne les acteurs du tourisme et les voyageurs dans la concrétisation de leurs projets. 
+        De la gestion opérationnelle d'infrastructures à la création de circuits sur-mesure, notre engagement 
+        repose sur la qualité, la durabilité et l'excellence du service.
+      </p>
+    </div>
+    <div class="col-lg-6">
+      <div class="row g-3">
+        <div class="col-6">
+          <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=600" class="img-fluid rounded shadow-sm" alt="Hôtel de luxe">
+        </div>
+        <div class="col-6 mt-4">
+          <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=600" class="img-fluid rounded shadow-sm" alt="Plage destination">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="my-5 text-muted opacity-25">
+
+  <div class="text-center mb-5">
+    <span class="text-primary fw-bold text-uppercase">Ce que nous faisons</span>
+    <h2 class="fw-bold mt-2">Nos Services Proposés</h2>
+    <p class="text-muted">Découvrez les différents axes d'intervention de notre pôle spécialisé.</p>
+  </div>
+
+  <div class="row g-4 mb-5">
+    <div class="col-md-4">
+      <div class="card h-100 border-0 shadow-sm hover-up text-white overflow-hidden position-relative" style="min-height: 350px; background: url('https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=600') no-repeat center center; background-size: cover;">
+        <div class="card-overlay p-4 d-flex flex-column h-100 justify-content-end position-relative" style="z-index: 2;">
+          <div class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-25 text-white rounded-3 p-3 mb-4 align-self-start">
+            <i class="bi bi-building fs-3"></i> 
+          </div>
+          <h4 class="card-title fw-bold mb-3">Gestion Hôtelière</h4>
+          <p class="card-text text-light text-opacity-90">Optimisation opérationnelle, management des équipes et stratégie de rendement pour les établissements haut de gamme.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card h-100 border-0 shadow-sm hover-up text-white overflow-hidden position-relative" style="min-height: 350px; background: url('https://images.unsplash.com/photo-1488646953014-85cb44e25828?q=80&w=600') no-repeat center center; background-size: cover;">
+        <div class="card-overlay p-4 d-flex flex-column h-100 justify-content-end position-relative" style="z-index: 2;">
+          <div class="d-inline-flex align-items-center justify-content-center bg-success bg-opacity-25 text-white rounded-3 p-3 mb-4 align-self-start">
+            <i class="bi bi-compass fs-3"></i> 
+          </div>
+          <h4 class="card-title fw-bold mb-3">Voyages Sur-Mesure</h4>
+          <p class="card-text text-light text-opacity-90">Conception d'itinéraires uniques, réservations exclusives et assistance 24/7 pour une clientèle exigeante.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card h-100 border-0 shadow-sm hover-up text-white overflow-hidden position-relative" style="min-height: 350px; background: url('https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=600') no-repeat center center; background-size: cover;">
+        <div class="card-overlay p-4 d-flex flex-column h-100 justify-content-end position-relative" style="z-index: 2;">
+          <div class="d-inline-flex align-items-center justify-content-center bg-warning bg-opacity-25 text-white rounded-3 p-3 mb-4 align-self-start">
+            <i class="bi bi-globe-americas fs-3"></i> 
+          </div>
+          <h4 class="card-title fw-bold mb-3">Éco-Tourisme</h4>
+          <p class="card-text text-light text-opacity-90">Développement de projets éco-responsables et intégration des normes durables au sein des structures touristiques.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="my-5 py-4">
+    <div class="text-center mb-4">
+      <span class="text-primary fw-bold text-uppercase">Formules & Circuits</span>
+      <h2 class="fw-bold mt-2">Nos Prestations Phares</h2>
+      <p class="text-muted">Cliquez sur une prestation pour consulter les sessions programmées et réserver votre place.</p>
+    </div>
+
+    <div id="prestationCarousel" class="carousel slide mb-4" data-bs-ride="carousel">
+      <div class="carousel-inner">
+        
+        <div class="carousel-item active">
+          <div class="row g-4 justify-content-center">
+            @for (prestation of prestationsTourisme.slice(0, 2); track prestation.id) {
+              <div class="col-md-6">
+                <div class="card h-100 border shadow-sm hover-up position-relative" (click)="ouvrirSessions(prestation)" style="cursor: pointer;">
+                  <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                      <h4 class="card-title fw-bold text-dark mb-0">{{ prestation.titreService }}</h4>
+                      <span class="badge bg-success-subtle text-success px-3 py-2 rounded-pill fw-bold">
+                        Dès {{ prestation.prixBase }} €
+                      </span>
+                    </div>
+                    
+                    <p class="card-text text-muted mb-4">{{ prestation.description }}</p>
+                    
+                    @if (prestation.metadata?.lieu_depart) {
+                      <div class="bg-light p-3 rounded-3 d-flex align-items-center justify-content-between small text-muted">
+                        <div><i class="bi bi-geo-alt-fill text-danger me-2"></i>Départ : <strong>{{ prestation.metadata?.lieu_depart }}</strong></div>
+                        <div><i class="bi bi-arrow-right text-primary mx-2"></i></div>
+                        <div><i class="bi bi-flag-fill text-success me-2"></i>Arrivée : <strong>{{ prestation.metadata?.lieu_arrivee }}</strong></div>
+                      </div>
+                    }
+                  </div>
+                  <div class="card-footer bg-transparent border-0 px-4 pb-4 pt-0 text-end">
+                    <span class="text-primary small fw-semibold">Voir les sessions <i class="bi bi-chevron-right ms-1"></i></span>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="carousel-item">
+          <div class="row g-4 justify-content-center">
+            <div class="col-md-6">
+              <div class="card h-100 border shadow-sm text-center py-5 text-muted bg-light border-dashed">
+                <div class="card-body d-flex flex-column justify-content-center align-items-center py-4">
+                  <i class="bi bi-plus-circle fs-1 text-secondary mb-3"></i>
+                  <h5 class="fw-bold text-dark">Vos prochaines formules</h5>
+                  <p class="small text-muted px-4">Les prochaines prestations synchronisées s'injecteront automatiquement dans ce volet du slider.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <button class="carousel-control-prev" type="button" data-bs-target="#prestationCarousel" data-bs-slide="prev" style="width: 5%;">
+        <span class="carousel-control-prev-icon bg-dark rounded-circle p-2" aria-hidden="true"></span>
+        <span class="visually-hidden">Précédent</span>
+      </button>
+      <button class="carousel-control-next" type="button" data-bs-target="#prestationCarousel" data-bs-slide="next" style="width: 5%;">
+        <span class="carousel-control-next-icon bg-dark rounded-circle p-2" aria-hidden="true"></span>
+        <span class="visually-hidden">Suivant</span>
+      </button>
+    </div>
+
+    <div class="text-center mb-5">
+      <a routerLink="/tourisme/catalogue" class="btn btn-outline-primary btn-lg px-5 fw-semibold shadow-sm">
+        <i class="bi bi-grid-3x3-gap me-2"></i>Explorer tout le catalogue
+      </a>
+    </div>
+  </div>
+
+  <app-sessions-prestation-modal
+    [ouverte]="modalOuverte"
+    [prestation]="prestationSelectionnee"
+    (fermer)="fermerSessions()"
+  />
+
+  <div class="bg-light rounded-4 p-5 text-center my-5 border shadow-sm">
+    <h3 class="fw-bold mb-3">Un projet touristique en vue ?</h3>
+    <p class="text-muted mb-4 mx-auto" style="max-width: 600px;">
+      Nos experts sont à votre disposition pour étudier vos besoins et vous proposer des solutions adaptées et chiffrées.
+    </p>
+    <a routerLink="/devis/tourisme" class="btn btn-primary btn-lg px-4 py-2 fw-semibold shadow-sm">
+      <i class="bi bi-file-earmark-text me-2"></i>Demander un devis
+    </a>
+  </div>
+
+</div>

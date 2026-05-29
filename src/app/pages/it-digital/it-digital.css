@@ -1,0 +1,24 @@
+/* Séparation fine entre les lignes de services */
+.border-b-tech {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+/* Effet de transition élégant au survol d'une ligne */
+.item-row {
+  transition: background-color 0.2s ease, padding-left 0.2s ease;
+}
+
+.item-row:hover {
+  background-color: rgba(13, 110, 253, 0.02); /* Très léger voile bleu */
+  border-left: 3px solid #0d6efd;
+  padding-left: 10px;
+}
+
+.it-prestation-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.it-prestation-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 0.5rem 1.25rem rgba(15, 23, 42, 0.12) !important;
+}

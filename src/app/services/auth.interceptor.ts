@@ -9,8 +9,6 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   const token = localStorage.getItem('accessToken');
 
-  console.log("INTERCEPTOR TOKEN =>", token);
-
   if (!token) {
     return next(req);
   }
