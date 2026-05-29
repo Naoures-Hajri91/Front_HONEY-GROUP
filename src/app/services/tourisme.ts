@@ -130,7 +130,7 @@ export class TourismeService {
     const capaciteMaxParsed = parseInt(String(capaciteMax), 10);
 
     // Extraire l'ID de prestation de manière exhaustive
-    const prestationIdFound = sessionData.prestationId || sessionData.prestation_id || sessionData.id_prestation || sessionData.prestation?.id;
+    const prestationIdFound = sessionData.idPrestation || sessionData.prestationId || sessionData.prestation_id || sessionData.id_prestation || sessionData.prestation?.id;
 
     const sessionNormalisee: Session = {
       id: Number(sessionData.id),

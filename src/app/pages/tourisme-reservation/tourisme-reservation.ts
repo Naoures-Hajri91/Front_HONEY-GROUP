@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { TourismeService, Prestation, Session, BookingRequest } from '../../services/tourisme';
@@ -23,6 +23,7 @@ export class TourismeReservation implements OnInit {
   private tourismeService = inject(TourismeService);
   private authService = inject(Auth);
   private toastr = inject(ToastrService);
+  private cd = inject(ChangeDetectorRef);
 
   // Passerelle pour rendre l'énumération accessible dans le fichier HTML
   protected readonly TypePayment = TypePayment;
@@ -55,20 +56,36 @@ export class TourismeReservation implements OnInit {
     // 1. Récupération directe de LA session via son ID unique
     this.tourismeService.getSessionById(idSession).subscribe({
       next: (session: Session) => {
-        this.sessionSelectionnee = session;
-        this.placesRestantes = session.capaciteMax - session.nbInscrits;
+        // Le setTimeout permet de repousser la mise à jour de l'UI au prochain tour d'horloge
+        // de la machine virtuelle, évitant ainsi l'erreur de détection de changements.
+        setTimeout(() => {
+          this.sessionSelectionnee = session;
+          this.placesRestantes = session.capaciteMax - session.nbInscrits;
 
-        // 2. Récupération directe de LA prestation correspondante
-        if (session.idPrestation) {
-          this.tourismeService.getPrestationById(session.idPrestation).subscribe({
-            next: (prestation: Prestation) => {
-              this.prestation = prestation;
-            },
-            error: (err) => console.error('Erreur lors du chargement de la prestation', err)
-          });
-        }
+          // 2. Récupération directe de LA prestation correspondante
+          if (session.idPrestation) {
+            this.tourismeService.getPrestationById(session.idPrestation).subscribe({
+              next: (prestation: Prestation) => {
+                this.prestation = prestation;
+                this.cd.markForCheck();
+              },
+              error: (err) => {
+                console.error('Erreur lors du chargement de la prestation', err);
+                this.toastr.error("Impossible de récupérer les détails de la prestation.");
+              }
+            });
+          } else {
+            this.toastr.error("Données de prestation manquantes pour cette session.");
+          }
+          
+          this.cd.markForCheck();
+        });
       },
-      error: (err) => console.error('Erreur lors du chargement de la session', err)
+      error: (err) => {
+        console.error('Erreur lors du chargement de la session', err);
+        this.toastr.error("Session introuvable ou erreur serveur.");
+        this.router.navigate(['/tourisme/catalogue']);
+      }
     });
   }
 
