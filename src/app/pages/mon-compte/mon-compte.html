@@ -26,16 +26,29 @@
         <i class="bi bi-person me-1"></i> Mes informations
       </button>
     </li>
-    <li class="nav-item" role="presentation">
-      <button
-        type="button"
-        class="nav-link"
-        [class.active]="ongletActif === 'dashboard'"
-        (click)="changerOnglet('dashboard')"
-      >
-        <i class="bi bi-grid me-1"></i> Tableau de bord
-      </button>
-    </li>
+    @if (userRole === Role.CLIENT) {
+      <li class="nav-item">
+        <button type="button" class="nav-link" [class.active]="ongletActif === 'validations'" (click)="changerOnglet('validations')">
+          <i class="bi bi-grid me-1"></i> Tableau de bord
+        </button>
+      </li>
+    } @else {
+      <li class="nav-item">
+        <button type="button" class="nav-link" [class.active]="ongletActif === 'validations'" (click)="changerOnglet('validations')">
+          <i class="bi bi-shield-check me-1"></i> Validations et demandes
+        </button>
+      </li>
+      <li class="nav-item">
+        <button type="button" class="nav-link" [class.active]="ongletActif === 'all-bookings'" (click)="changerOnglet('all-bookings')">
+          <i class="bi bi-journal-text me-1"></i> Réservations
+        </button>
+      </li>
+      <li class="nav-item">
+        <button type="button" class="nav-link" [class.active]="ongletActif === 'all-payments'" (click)="changerOnglet('all-payments')">
+          <i class="bi bi-currency-euro me-1"></i> Flux financiers
+        </button>
+      </li>
+    }
   </ul>
   <hr class="my-5">
 
@@ -120,7 +133,7 @@
             <div class="card-body p-4">
               <h2 class="h5 fw-bold mb-3 text-primary">Accès Staff</h2>
               <p class="small text-muted">Vous disposez de privilèges étendus pour la gestion des réservations et des paiements.</p>
-              <button class="btn btn-primary btn-sm w-100" (click)="changerOnglet('dashboard')">
+              <button class="btn btn-primary btn-sm w-100" (click)="changerOnglet('validations')">
                 Aller au tableau de bord
               </button>
             </div>
@@ -129,7 +142,7 @@
       </div>
     </div>
 
-  } @else if (ongletActif === 'dashboard') {
+  } @else if (ongletActif === 'validations') {
     <!-- ================== VUE DYNAMIQUE SELON LE RÔLE ================== -->
     
     @if (userRole === Role.CLIENT) {
@@ -365,24 +378,24 @@
                       </thead>
                       <tbody>
                         @for (paiement of paiementsPaginees; track paiement.id) {
-                          <tr [class.table-warning]="paiement.statut === StatutPayment.EN_VERIFICATION">
+                          <tr [class.table-warning]="paiement.statutPaiement === StatutPayment.EN_VERIFICATION">
                             <td>
                               <strong>{{ paiement.clientPrenom }} {{ paiement.clientNom }}</strong>
                               <br />
                               <small class="text-muted">{{ paiement.clientEmail }}</small>
                             </td>
-                            <td class="fw-semibold">{{ formatMontant(paiement.montant) }}</td>
+                            <td class="fw-semibold">{{ formatMontant(paiement.montantPaye) }}</td>
                             <td>
-                              <span class="badge bg-info-subtle text-info">{{ paiement.typePayment || 'N/A' }}</span>
+                              <span class="badge bg-info-subtle text-info">{{ paiement.methode || 'N/A' }}</span>
                             </td>
                             <td>
-                              <span [class]="'badge ' + obtenirCouleurStatutPaiement(paiement.statut)">
-                                {{ obtenirLibelleStatutPaiement(paiement.statut) }}
+                              <span [class]="'badge ' + obtenirCouleurStatutPaiement(paiement.statutPaiement)">
+                                {{ obtenirLibelleStatutPaiement(paiement.statutPaiement) }}
                               </span>
                             </td>
                             <td>
-                              @if (paiement.lienPreuve) {
-                                <a [href]="paiement.lienPreuve" target="_blank" class="btn btn-sm btn-outline-info">
+                              @if (paiement.preuveUrl) {
+                                <a [href]="paiement.preuveUrl" target="_blank" class="btn btn-sm btn-outline-info">
                                   <i class="bi bi-file-earmark-pdf"></i>
                                 </a>
                               } @else {
@@ -390,10 +403,10 @@
                               }
                             </td>
                             <td>
-                              <small>{{ formatDate(paiement.dateCreation) }}</small>
+                              <small>{{ formatDate(paiement.datePaiement) }}</small>
                             </td>
                             <td>
-                              @if (paiement.statut === StatutPayment.EN_VERIFICATION) {
+                              @if (paiement.statutPaiement === StatutPayment.EN_VERIFICATION) {
                                 <button
                                   type="button"
                                   class="btn btn-sm btn-success me-2"
@@ -486,7 +499,6 @@
                       </thead>
                       <tbody>
                         @for (booking of reservationsFiltrees; track booking.id) {
-                          @if (booking.statut === StatutBooking.DEMANDE_ANNULATION) {
                             <tr class="table-warning">
                               <td>
                                 <strong>{{ booking.userNomComplet || 'Client inconnu' }}</strong>
@@ -529,7 +541,6 @@
                                 </button>
                               </td>
                             </tr>
-                          }
                         }
                       </tbody>
                     </table>
@@ -541,5 +552,178 @@
         </div>
       </div>
     }
+  } @else if (ongletActif === 'all-bookings') {
+    <!-- ================== ONGLET TOUTES LES RÉSERVATIONS (STAFF) ================== -->
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4">
+        <h2 class="h5 fw-bold mb-4">Registre global des réservations</h2>
+        
+        <div class="row g-3 mb-4 bg-light p-3 rounded">
+          <div class="col-md-5">
+            <label class="form-label small fw-bold">1. Sélectionner un Client</label>
+            <select class="form-select" [(ngModel)]="filtrePaiementUserId" (change)="chargerReservationsParClient(filtrePaiementUserId)">
+              <option [ngValue]="null">— Choisir un client —</option>
+              @for (user of allUsers; track user.id) {
+                <option [value]="user.id">{{ user.prenom }} {{ user.nom }}</option>
+              }
+            </select>
+          </div>
+          <div class="col-md-5">
+            <label class="form-label small fw-bold">2. Ou par Prestation (Local)</label>
+            <select class="form-select" [(ngModel)]="filtreStaffSessionId" (change)="filtrerReservationsStaff()">
+              <option [ngValue]="null">Toutes les sessions</option>
+              @for (s of sessionsFiltreesPourFiltre; track s.id) {
+                <option [value]="s.id">Session #{{ s.id }} (Du {{ formatDate(s.dateDebut) }})</option>
+              }
+            </select>
+          </div>
+          <div class="col-md-2">
+            <label class="form-label small fw-bold">&nbsp;</label>
+            <button type="button" class="btn btn-sm btn-outline-secondary w-100" (click)="filtreStaffPrestationId = null; filtreStaffSessionId = null; filtrerReservationsStaff()">
+              Réinitialiser
+            </button>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>ID</th>
+                <th>Client</th>
+                <th>Prestation / Session</th>
+                <th>Places</th>
+                <th>Montant</th>
+                <th>Statut</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (resa of reservationsFiltrees; track resa.id) {
+                <tr>
+                  <td>#{{ resa.id }}</td>
+                  <td><strong>{{ resa.userNomComplet }}</strong></td>
+                  <td>
+                    {{ resa.prestationTitre }}<br>
+                    <small class="text-muted">Session #{{ resa.sessionId }}</small>
+                  </td>
+                  <td>{{ resa.nbPersonnes }}</td>
+                  <td class="fw-bold">{{ formatMontant(resa.montantTotal) }}</td>
+                  <td>
+                    <span class="badge" [ngClass]="resa.statut === StatutBooking.CONFIRME ? 'bg-success' : 'bg-warning'">
+                      {{ resa.statut }}
+                    </span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  } @else if (ongletActif === 'all-payments') {
+    <!-- ================== ONGLET FLUX FINANCIERS (STAFF) ================== -->
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4">
+        <h2 class="h5 fw-bold mb-4">Historique complet des transactions</h2>
+        
+        <div class="table-responsive">
+        <div class="row g-3 mb-4 bg-light p-3 rounded">
+          <div class="col-md-4">
+            <label class="form-label small fw-bold">Filtrer par Client</label>
+            <select class="form-select" [(ngModel)]="filtrePaiementUserId" (change)="chargerTousLesPaiements()">
+              <option [ngValue]="null">Tous les clients</option>
+              @for (user of allUsers; track user.id) {
+                <option [value]="user.id">{{ user.prenom }} {{ user.nom }} ({{ user.email }})</option>
+              }
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label small fw-bold">Filtrer par Statut</label>
+            <select class="form-select" [(ngModel)]="filtrePaiementStatut" (change)="appliquerFiltrePaiements()">
+              <option value="">— Tous les statuts —</option>
+              <option [value]="StatutPayment.EN_ATTENTE_PREUVE">🕒 En attente de preuve</option>
+              <option [value]="StatutPayment.EN_VERIFICATION">⏳ En vérification</option>
+              <option [value]="StatutPayment.VALIDE">✓ Validé</option>
+              <option [value]="StatutPayment.REJETE">✗ Rejeté</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label small fw-bold">&nbsp;</label>
+            <button type="button" class="btn btn-sm btn-outline-secondary w-100" (click)="filtrePaiementUserId = null; filtrePaiementStatut = ''; chargerTousLesPaiements()">
+              Réinitialiser les filtres
+            </button>
+          </div>
+        </div>
+
+          <table class="table table-hover align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>ID Trans.</th>
+                <th>Date</th>
+                <th>Client</th>
+                <th>Montant</th>
+                <th>Méthode</th>
+                <th>Statut</th>
+                <th>Détails</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (p of paiementsPaginees; track p.id) {
+                <tr>
+                  <td><small class="font-monospace">{{ p.transactionId || '#' + p.id }}</small></td>
+                  <td>{{ formatDate(p.datePaiement) }}</td>
+                  <td>
+                    <strong>{{ p.clientPrenom }} {{ p.clientNom }}</strong><br><small class="text-muted">{{ p.clientEmail }}</small>
+                  </td>
+                  <td class="fw-bold text-primary">{{ formatMontant(p.montantPaye) }}</td>
+                  <td><span class="badge bg-info-subtle text-info">{{ p.methode }}</span></td>
+                  <td>
+                    <span [class]="'badge ' + obtenirCouleurStatutPaiement(p.statutPaiement)">
+                      {{ obtenirLibelleStatutPaiement(p.statutPaiement) }}
+                    </span>
+                  </td>
+                  <td>
+                    @if (p.preuveUrl) {
+                      <a [href]="p.preuveUrl" target="_blank" class="btn btn-sm btn-link">Preuve</a>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Contrôles de pagination déplacés en dehors du tableau -->
+        @if (paiementsFiltres.length > itemsParPagePaiements) {
+          <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+            <div class="text-muted small">
+              Affichage {{ (pagePaiements - 1) * itemsParPagePaiements + 1 }} à
+              {{ Math.min(pagePaiements * itemsParPagePaiements, paiementsFiltres.length) }}
+              sur {{ paiementsFiltres.length }} paiement(s)
+            </div>
+            <div>
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-primary"
+                [disabled]="pagePaiements === 1"
+                (click)="pagePaiements = pagePaiements - 1"
+              >
+                <i class="bi bi-chevron-left"></i> Précédent
+              </button>
+              <span class="px-3 small">Page {{ pagePaiements }} / {{ totalPagesPaiements }}</span>
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-primary"
+                [disabled]="pagePaiements >= totalPagesPaiements"
+                (click)="pagePaiements = pagePaiements + 1"
+              >
+                Suivant <i class="bi bi-chevron-right"></i>
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
   }
 </div>

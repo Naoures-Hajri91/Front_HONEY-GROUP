@@ -18,6 +18,20 @@ export class BookingService {
   }
 
   /**
+   * VUE STAFF : Récupère TOUTES les réservations du système
+   */
+  getAllBookings(): Observable<Booking[]> {
+    return this.http.get<Booking[]>(this.apiUrl);
+  }
+
+  /**
+   * VUE STAFF : Récupère les demandes d'annulation en attente
+   */
+  getCancellationRequests(): Observable<Booking[]> {
+    return this.http.get<Booking[]>(`${this.apiUrl}/admin/cancellation-requests`);
+  }
+
+  /**
    * VUE STAFF : Récupère l'historique des réservations d'un client spécifique
    */
   getDossierClientForStaff(userId: number): Observable<Booking[]> {

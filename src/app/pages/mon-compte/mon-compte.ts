@@ -7,12 +7,13 @@ import { RouterModule } from '@angular/router';
 import { Auth } from '../../services/auth';
 import { BookingService } from '../../services/booking.service';
 import { PaymentService, Payment } from '../../services/payment.service';
+import { TourismeService, Prestation, Session } from '../../services/tourisme';
 import { ToastrService } from 'ngx-toastr';
 import { UserProfile } from '../../models/user-profile';
 import { Booking } from '../../models/booking';
 import { Role, StatutBooking, StatutPayment } from '../../models/role';
 
-type OngletCompte = 'infos' | 'dashboard';
+type OngletCompte = 'infos' | 'validations' | 'all-bookings' | 'all-payments';
 
 @Component({
   selector: 'app-mon-compte',
@@ -26,6 +27,7 @@ export class MonCompte implements OnInit {
   private authService = inject(Auth);
   private bookingService = inject(BookingService);
   private paymentService = inject(PaymentService);
+  private tourismeService = inject(TourismeService);
   protected toastr = inject(ToastrService);
   private platformId = inject(PLATFORM_ID);
   private cd = inject(ChangeDetectorRef);
@@ -36,7 +38,6 @@ export class MonCompte implements OnInit {
   chargementPaiements = false;
   envoiProfil = false;
   envoiResetMdp = false;
-
   protected readonly Role = Role;
   protected readonly StatutPayment = StatutPayment;
   protected readonly StatutBooking = StatutBooking;
@@ -47,10 +48,11 @@ export class MonCompte implements OnInit {
   reservationsFiltrees: Booking[] = [];
   paiements: Payment[] = [];
   paiementsFiltres: Payment[] = [];
-  
-  // Pour la vue STAFF
-  clientsFichiersList: Booking[] = [];
-  clientsSelectionnes: Map<number, Booking[]> = new Map();
+
+  // Catalogues pour filtres Staff
+  toutesPrestations: Prestation[] = [];
+  toutesSessions: Session[] = [];
+  allUsers: UserProfile[] = []; // Nouveau: Pour filtrer les paiements par utilisateur
 
   Math = Math;
   pageReservations = 1;
@@ -65,6 +67,11 @@ export class MonCompte implements OnInit {
   filtreMontantMax: number | null = null;
   filtrePaiementStatut = '';
   filtrePaiementClient = '';
+  filtrePaiementUserId: number | null = null; // Nouveau: Filtrer les paiements par ID utilisateur
+  
+  // Nouveaux filtres Staff
+  filtreStaffPrestationId: number | null = null;
+  filtreStaffSessionId: number | null = null;
 
   profileForm: FormGroup = this.fb.group({
     nom: ['', [Validators.required, Validators.pattern('^[A-Za-zÀ-ÖØ-öø-ÿ -]{2,100}$')]],
@@ -81,11 +88,35 @@ export class MonCompte implements OnInit {
 
   changerOnglet(onglet: OngletCompte): void {
     this.ongletActif = onglet;
-    if (onglet === 'dashboard' && this.reservations.length === 0 && !this.chargementReservations) {
+    
+    // Ensure userRole is loaded before making role-specific decisions
+    if (this.userRole === null) {
+      console.warn("User role not yet loaded when changing tab. Deferring action.");
+      // Optionally, show a loading indicator or disable tabs until profile is loaded
+      return; 
+    }
+
+    if (onglet === 'validations') {
       if (this.userRole === Role.CLIENT) {
-        this.chargerReservations();
+        this.chargerReservations(); // Client's personal reservations
+      } else { // MANAGER or ADMIN
+        this.chargerDashboardStaff(); // Staff's validation dashboard
+      }
+    } else if (onglet === 'all-bookings') {
+      if (this.userRole === Role.MANAGER || this.userRole === Role.ADMIN) {
+        this.chargerToutesLesReservations();
+        this.chargerCataloguesFiltres();
       } else {
-        this.chargerDashboardStaff();
+        this.toastr.error("Accès refusé. Cette section est réservée au personnel.");
+        this.ongletActif = 'infos'; // Redirect to infos tab
+      }
+    } else if (onglet === 'all-payments') {
+      if (this.userRole === Role.MANAGER || this.userRole === Role.ADMIN) {
+        this.chargerTousLesPaiements();
+        this.chargerTousLesUtilisateurs();
+      } else {
+        this.toastr.error("Accès refusé. Cette section est réservée au personnel.");
+        this.ongletActif = 'infos'; // Redirect to infos tab
       }
     }
   }
@@ -183,11 +214,13 @@ export class MonCompte implements OnInit {
         this.reservations = bookings ?? [];
         this.appliquerFiltresReservations();
         this.chargementReservations = false;
+        this.cd.markForCheck();
       },
       error: (err) => {
         console.error(err);
         this.toastr.error('Impossible de charger vos réservations.', 'Erreur');
         this.chargementReservations = false;
+        this.cd.markForCheck();
       },
     });
   }
@@ -245,50 +278,165 @@ export class MonCompte implements OnInit {
 
   // ================== VUE STAFF (MANAGER/ADMIN) ==================
 
+  chargerCataloguesFiltres(): void {
+    if (this.toutesPrestations.length === 0) {
+      this.tourismeService.getPrestations().subscribe(res => this.toutesPrestations = res);
+    }
+    if (this.toutesSessions.length === 0) {
+      this.tourismeService.getSessions().subscribe(res => this.toutesSessions = res);
+    }
+  }
+
+  /**
+   * Charge les réservations d'un client spécifique pour le Staff
+   */
+  chargerReservationsParClient(userId: number | null): void {
+    if (!userId) {
+      this.reservations = [];
+      this.reservationsFiltrees = [];
+      return;
+    }
+    this.chargementReservations = true;
+    this.bookingService.getDossierClientForStaff(Number(userId)).subscribe({
+      next: (res: Booking[]) => {
+        this.reservations = res ?? [];
+        this.reservationsFiltrees = [...this.reservations];
+        this.chargementReservations = false;
+        this.cd.markForCheck();
+      },
+      error: (err: any) => {
+        this.toastr.error("Erreur lors du chargement du dossier client.");
+        this.chargementReservations = false;
+        this.cd.markForCheck();
+      }
+    });
+  }
+
+  chargerToutesLesReservations(): void {
+    // This function is reserved for staff. Only proceed if user is MANAGER or ADMIN.
+    if (this.userRole !== Role.MANAGER && this.userRole !== Role.ADMIN) {
+      console.warn("Attempted to load all bookings without staff privileges.");
+      this.toastr.error("Accès refusé. Cette section est réservée au personnel.");
+      this.ongletActif = 'infos'; // Redirect to infos tab
+      return;
+    }
+    this.chargementReservations = true;
+    this.bookingService.getAllBookings().subscribe({
+      next: (res) => {
+        this.reservations = res ?? [];
+        this.filtrerReservationsStaff();
+        this.chargementReservations = false;
+        this.cd.markForCheck();
+      },
+      error: () => {
+        this.chargementReservations = false;
+        this.cd.markForCheck();
+      }
+    });
+  }
+
+  chargerTousLesPaiements(): void {
+    // This function is reserved for staff. Only proceed if user is MANAGER or ADMIN.
+    if (this.userRole !== Role.MANAGER && this.userRole !== Role.ADMIN) {
+      console.warn("Attempted to load all payments without staff privileges.");
+      this.toastr.error("Accès refusé. Cette section est réservée au personnel.");
+      this.ongletActif = 'infos'; // Redirect to infos tab
+      return;
+    }
+    this.chargementPaiements = true;
+
+    // On choisit l'observable en fonction du filtre utilisateur
+    const observablePaiements = this.filtrePaiementUserId
+      ? this.paymentService.getPaymentsByUser(Number(this.filtrePaiementUserId))
+      : this.paymentService.getAllPayments();
+
+    observablePaiements.subscribe({
+      next: (res: Payment[]) => {
+        this.paiements = res ?? [];
+        this.appliquerFiltrePaiements();
+        this.chargementPaiements = false;
+        this.cd.markForCheck();
+      },
+      error: (err: any) => {
+        console.error('Erreur chargement paiements', err);
+        this.chargementPaiements = false;
+        this.cd.markForCheck();
+      }
+    });
+  }
+
+  chargerTousLesUtilisateurs(): void {
+    // This method is reserved for staff.
+    if (this.userRole !== Role.MANAGER && this.userRole !== Role.ADMIN) {
+      console.warn("Attempted to load all users without staff privileges.");
+      return;
+    }
+
+    // Cette méthode doit être ajoutée au service Auth
+    this.authService.getAllUsersForStaff().subscribe({
+      next: (users) => {
+        this.allUsers = users;
+      },
+      error: (err) => {
+        console.error('Erreur lors du chargement des utilisateurs', err);
+        this.toastr.error("Impossible de charger la liste des utilisateurs.");
+      }
+    });
+  }
+
+  filtrerReservationsStaff(): void {
+    this.reservationsFiltrees = this.reservations.filter(r => {
+      const matchPresta = !this.filtreStaffPrestationId || r.prestationId === Number(this.filtreStaffPrestationId);
+      const matchSession = !this.filtreStaffSessionId || r.sessionId === Number(this.filtreStaffSessionId);
+      return matchPresta && matchSession;
+    });
+    this.pageReservations = 1;
+  }
+
+  get sessionsFiltreesPourFiltre(): Session[] {
+    if (!this.filtreStaffPrestationId) return this.toutesSessions;
+    return this.toutesSessions.filter(s => s.prestationId === Number(this.filtreStaffPrestationId));
+  }
+
+  onFiltrePrestationChange(): void {
+    this.filtreStaffSessionId = null; // Reset session si on change de prestation
+    this.filtrerReservationsStaff();
+  }
+
   chargerDashboardStaff(): void {
     this.chargementReservations = true;
     this.chargementPaiements = true;
 
-    this.bookingService.getMyBookings().subscribe({
+    // Charger toutes les réservations et filtrer pour les demandes d'annulation
+    this.bookingService.getCancellationRequests().subscribe({
       next: (bookings) => {
         this.reservations = bookings ?? [];
-        this.clientsFichiersList = this.extractClientsUniques(bookings);
-        this.appliquerFiltresReservations();
+        this.reservationsFiltrees = [...this.reservations]; // Le backend a déjà filtré
         this.chargementReservations = false;
+        this.pageReservations = 1; // Sécurité : retour à la page 1
+        this.cd.markForCheck();
       },
       error: (err) => {
         console.error(err);
         this.chargementReservations = false;
+        this.cd.markForCheck();
       },
     });
 
-    this.chargerPaiementsStaff();
-  }
-
-  extractClientsUniques(bookings: Booking[]): Booking[] {
-    const seen = new Set<number>();
-    const uniques: Booking[] = [];
-    for (const b of bookings) {
-      if (b.userId && !seen.has(b.userId)) {
-        seen.add(b.userId);
-        uniques.push(b);
-      }
-    }
-    return uniques;
-  }
-
-  chargerPaiementsStaff(): void {
-    this.chargementPaiements = true;
-    this.paymentService.getMyPayments().subscribe({
-      next: (paiements) => {
+    // Charger tous les paiements et filtrer pour la vérification
+    this.paymentService.getPaymentsPendingVerification().subscribe({
+      next: (paiements: Payment[]) => {
         this.paiements = paiements ?? [];
-        this.appliquerFiltrePaiements();
+        this.paiementsFiltres = [...this.paiements]; // Pas besoin de filtrer, le backend le fait déjà
         this.chargementPaiements = false;
+        this.pagePaiements = 1; // Sécurité : retour à la page 1
+        this.cd.markForCheck();
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error(err);
         this.toastr.error('Impossible de charger les paiements.', 'Erreur');
         this.chargementPaiements = false;
+        this.cd.markForCheck();
       },
     });
   }
@@ -296,25 +444,27 @@ export class MonCompte implements OnInit {
   appliquerFiltrePaiements(): void {
     const statutRecherche = this.filtrePaiementStatut;
     const clientFilter = this.filtrePaiementClient.toLowerCase();
+    const userIdFilter = this.filtrePaiementUserId; // Nouveau filtre
 
     this.paiementsFiltres = this.paiements.filter((p) => {
-      const matchStatut = !statutRecherche || p.statut === statutRecherche;
+      const matchStatut = !statutRecherche || p.statutPaiement === statutRecherche; // Utilise statutPaiement
       const matchClient =
         !clientFilter ||
         `${p.clientNom} ${p.clientPrenom}`.toLowerCase().includes(clientFilter) ||
         p.clientEmail.toLowerCase().includes(clientFilter);
-      return matchStatut && matchClient;
+      const matchUser = !userIdFilter || p.clientId === Number(userIdFilter); // Nouvelle condition
+      return matchStatut && matchClient && matchUser;
     });
 
     this.pagePaiements = 1;
   }
 
   validerPaiement(payment: Payment): void {
-    if (confirm(`Valider le paiement de ${payment.clientNom} ${payment.clientPrenom} (${payment.montant}€) ?`)) {
+    if (confirm(`Valider le paiement de ${payment.clientNom} ${payment.clientPrenom} (${payment.montantPaye}€) ?`)) {
       this.paymentService.validerPaiement(payment.id).subscribe({
         next: () => {
           this.toastr.success(`Paiement #${payment.id} validé`, 'Succès');
-        payment.statut = StatutPayment.VALIDE;
+          payment.statutPaiement = StatutPayment.VALIDE; // Met à jour statutPaiement
           this.appliquerFiltrePaiements();
         },
         error: (err) => {
@@ -330,7 +480,7 @@ export class MonCompte implements OnInit {
       this.paymentService.rejeterPaiement(payment.id).subscribe({
         next: () => {
           this.toastr.success(`Paiement #${payment.id} rejeté`, 'Succès');
-        payment.statut = StatutPayment.REJETE;
+          payment.statutPaiement = StatutPayment.REJETE; // Met à jour statutPaiement
           this.appliquerFiltrePaiements();
         },
         error: (err) => {
@@ -358,7 +508,7 @@ export class MonCompte implements OnInit {
 
   // ================== FORMATEURS ==================
 
-  formatDate(value?: string): string {
+  formatDate(value?: string | Date): string {
     if (!value) {
       return '—';
     }
@@ -376,21 +526,22 @@ export class MonCompte implements OnInit {
     return `${montant} €`;
   }
 
-  obtenirLibelleStatutPaiement(statut: string): string {
-    const labels: { [key: string]: string } = {
+  obtenirLibelleStatutPaiement(statut: StatutPayment): string {
+    const labels: Record<StatutPayment, string> = { // Typage plus strict
       [StatutPayment.EN_VERIFICATION]: '⏳ En vérification',
       [StatutPayment.VALIDE]: '✓ Validé',
       [StatutPayment.REJETE]: '✗ Rejeté',
       [StatutPayment.EN_ATTENTE_PREUVE]: '🕒 Attente preuve'
     };
-    return labels[statut] || statut;
+    return labels[statut];
   }
 
-  obtenirCouleurStatutPaiement(statut: string): string {
-    const colors: { [key: string]: string } = {
+  obtenirCouleurStatutPaiement(statut: StatutPayment): string {
+    const colors: Record<StatutPayment, string> = {
       [StatutPayment.EN_VERIFICATION]: 'bg-warning-subtle text-warning',
       [StatutPayment.VALIDE]: 'bg-success-subtle text-success',
       [StatutPayment.REJETE]: 'bg-danger-subtle text-danger',
+      [StatutPayment.EN_ATTENTE_PREUVE]: 'bg-info-subtle text-info', // Ajout de la couleur pour le nouveau statut
     };
     return colors[statut] || 'bg-secondary-subtle text-secondary';
   }

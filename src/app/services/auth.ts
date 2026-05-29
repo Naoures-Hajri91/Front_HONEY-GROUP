@@ -1,6 +1,7 @@
 import {inject, Injectable, signal} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Observable, tap} from 'rxjs';
+import { Role } from '../models/role'; // Assurez-vous que Role est importé si ce n'est pas déjà fait
 import { ProfileUpdatePayload, UserProfile } from '../models/user-profile';
 
 @Injectable({
@@ -36,6 +37,14 @@ export class Auth {
     return this.http.get<UserProfile>(`${this.apiAuth}/me`).pipe(
       tap(user => this.currentUser.set(user))
     );
+  }
+
+  /**
+   * Récupère tous les utilisateurs pour le personnel (ADMIN/MANAGER).
+   * Nécessite un endpoint backend protégé, par exemple /api/users/all.
+   */
+  getAllUsersForStaff(): Observable<UserProfile[]> {
+    return this.http.get<UserProfile[]>(`${this.apiAuth}/clients`);
   }
 
   updateProfile(payload: ProfileUpdatePayload): Observable<UserProfile> {

@@ -10,13 +10,13 @@ export interface Payment {
   clientNom: string;
   clientPrenom: string;
   clientEmail: string;
-  montant: number;
-  typePayment?: string;
-  statut: StatutPayment;
-  dateCreation: string;
+  montantPaye: number; // Renommé de 'montant'
+  methode?: string; // Renommé de 'typePayment'
+  statutPaiement: StatutPayment; // Renommé de 'statut'
+  datePaiement: string; // Renommé de 'dateCreation'
   dateValidation?: string;
-  lienPreuve?: string;
-  idTransactionExterne?: string;
+  preuveUrl?: string; // Renommé de 'lienPreuve'
+  transactionId?: string; // Renommé de 'idTransactionExterne'
   prestationTitre?: string;
   dateResa?: string;
   sessionDebut?: string;
@@ -30,10 +30,24 @@ export class PaymentService {
   private apiUrl = 'http://localhost:8080/api/payments';
 
   /**
+   * Récupère tous les paiements (STAFF ONLY)
+   */
+  getAllPayments(): Observable<Payment[]> {
+    return this.http.get<Payment[]>(this.apiUrl);
+  }
+
+  /**
    * Récupère les paiements de l'utilisateur actuel
    */
   getMyPayments(): Observable<Payment[]> {
     return this.http.get<Payment[]>(`${this.apiUrl}/me`);
+  }
+
+  /**
+   * Récupère la liste des paiements en attente de vérification (STAFF ONLY)
+   */
+  getPaymentsPendingVerification(): Observable<Payment[]> {
+    return this.http.get<Payment[]>(`${this.apiUrl}/pending-verification`);
   }
 
   /**
