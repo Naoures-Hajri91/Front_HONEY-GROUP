@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, inject, OnInit, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { Auth } from '../../services/auth';
 
 @Component({
@@ -17,32 +17,24 @@ export class Header implements OnInit {
   private authService = inject(Auth);
   private cd = inject(ChangeDetectorRef);
   private platformId = inject(PLATFORM_ID);
+  private router = inject(Router);
 
-  user: any = null;
+  get user() {
+    return this.authService.currentUser();
+  }
 
   ngOnInit(): void {
-    if (!isPlatformBrowser(this.platformId) || !this.authService.isAuthenticated()) {
-      return;
+    if (isPlatformBrowser(this.platformId) && this.authService.isAuthenticated()) {
+      this.authService.getCurrentUser().subscribe({
+        next: () => {
+          this.cd.markForCheck();
+        }
+      });
     }
-
-    this.authService.getCurrentUser().subscribe({
-      next: (data) => {
-        this.user = data;
-        this.cd.markForCheck();
-      },
-      error: () => {
-        this.user = null;
-      },
-    });
   }
 
   logout(): void {
-
     this.authService.logout();
-
-    this.user = null;
-
-    // 🔥 refresh pour MAJ navbar immédiate
-    window.location.href = '/';
+    this.router.navigate(['/']);
   }
 }

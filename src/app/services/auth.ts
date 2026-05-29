@@ -80,13 +80,10 @@ export class Auth {
 
   // ✅ LOGOUT
   logout(): void {
-
     if (typeof window !== 'undefined') {
-
       localStorage.removeItem('accessToken');
-
       localStorage.removeItem('refreshToken');
-
     }
+    this.currentUser.set(null);
   }
 }

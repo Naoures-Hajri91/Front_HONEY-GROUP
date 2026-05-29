@@ -67,18 +67,25 @@ export class Login implements OnInit {
     const payload = this.loginForm.value;
 
     this.authService.login(payload).subscribe({
-
       next: (res) => {
-
         console.log("LOGIN SUCCESS =>", res);
 
         // 🔐 STOCKAGE TOKENS
         localStorage.setItem('accessToken', res.accessToken);
         localStorage.setItem('refreshToken', res.refreshToken);
 
-        this.toastr.success('Connexion réussie 🎉');
-
-        this.navigateAfterAuth();
+        // 🚀 Charger immédiatement le profil pour alimenter le Signal réactif
+        this.authService.getCurrentUser().subscribe({
+          next: () => {
+            this.toastr.success('Connexion réussie 🎉');
+            this.navigateAfterAuth();
+          },
+          error: () => {
+            // En cas d'erreur de chargement de profil, on laisse quand même l'utilisateur naviguer
+            this.toastr.success('Connexion réussie 🎉');
+            this.navigateAfterAuth();
+          }
+        });
       },
 
       error: (err: any) => {
