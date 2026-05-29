@@ -10,7 +10,7 @@ import { PaymentService, Payment } from '../../services/payment.service';
 import { ToastrService } from 'ngx-toastr';
 import { UserProfile } from '../../models/user-profile';
 import { Booking } from '../../models/booking';
-import { Role } from '../../models/role';
+import { Role, StatutBooking, StatutPayment } from '../../models/role';
 
 type OngletCompte = 'infos' | 'dashboard';
 
@@ -38,6 +38,8 @@ export class MonCompte implements OnInit {
   envoiResetMdp = false;
 
   protected readonly Role = Role;
+  protected readonly StatutPayment = StatutPayment;
+  protected readonly StatutBooking = StatutBooking;
   userRole: Role | null = null;
 
   profil: UserProfile | null = null;
@@ -292,11 +294,11 @@ export class MonCompte implements OnInit {
   }
 
   appliquerFiltrePaiements(): void {
-    const statut = this.filtrePaiementStatut.toUpperCase();
+    const statutRecherche = this.filtrePaiementStatut;
     const clientFilter = this.filtrePaiementClient.toLowerCase();
 
     this.paiementsFiltres = this.paiements.filter((p) => {
-      const matchStatut = !statut || p.statut === statut;
+      const matchStatut = !statutRecherche || p.statut === statutRecherche;
       const matchClient =
         !clientFilter ||
         `${p.clientNom} ${p.clientPrenom}`.toLowerCase().includes(clientFilter) ||
@@ -312,7 +314,7 @@ export class MonCompte implements OnInit {
       this.paymentService.validerPaiement(payment.id).subscribe({
         next: () => {
           this.toastr.success(`Paiement #${payment.id} validé`, 'Succès');
-          payment.statut = 'VALIDE';
+        payment.statut = StatutPayment.VALIDE;
           this.appliquerFiltrePaiements();
         },
         error: (err) => {
@@ -328,7 +330,7 @@ export class MonCompte implements OnInit {
       this.paymentService.rejeterPaiement(payment.id).subscribe({
         next: () => {
           this.toastr.success(`Paiement #${payment.id} rejeté`, 'Succès');
-          payment.statut = 'REJETE';
+        payment.statut = StatutPayment.REJETE;
           this.appliquerFiltrePaiements();
         },
         error: (err) => {
@@ -344,7 +346,7 @@ export class MonCompte implements OnInit {
       this.bookingService.approuverAnnulation(booking.id).subscribe({
         next: () => {
           this.toastr.success(`Annulation approuvée`, 'Succès');
-          booking.statut = 'ANNULEE';
+          booking.statut = StatutBooking.ANNULE;
         },
         error: (err) => {
           this.toastr.error("Erreur lors de l'approbation", 'Erreur');
@@ -376,18 +378,19 @@ export class MonCompte implements OnInit {
 
   obtenirLibelleStatutPaiement(statut: string): string {
     const labels: { [key: string]: string } = {
-      'EN_ATTENTE': '⏳ En attente',
-      'VALIDE': '✓ Validé',
-      'REJETE': '✗ Rejeté',
+      [StatutPayment.EN_VERIFICATION]: '⏳ En vérification',
+      [StatutPayment.VALIDE]: '✓ Validé',
+      [StatutPayment.REJETE]: '✗ Rejeté',
+      [StatutPayment.EN_ATTENTE_PREUVE]: '🕒 Attente preuve'
     };
     return labels[statut] || statut;
   }
 
   obtenirCouleurStatutPaiement(statut: string): string {
     const colors: { [key: string]: string } = {
-      'EN_ATTENTE': 'bg-warning-subtle text-warning',
-      'VALIDE': 'bg-success-subtle text-success',
-      'REJETE': 'bg-danger-subtle text-danger',
+      [StatutPayment.EN_VERIFICATION]: 'bg-warning-subtle text-warning',
+      [StatutPayment.VALIDE]: 'bg-success-subtle text-success',
+      [StatutPayment.REJETE]: 'bg-danger-subtle text-danger',
     };
     return colors[statut] || 'bg-secondary-subtle text-secondary';
   }

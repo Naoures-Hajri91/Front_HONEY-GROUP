@@ -329,9 +329,10 @@
                     <label class="form-label small fw-bold mb-1">Statut</label>
                     <select class="form-select form-select-sm" [(ngModel)]="filtrePaiementStatut" (change)="appliquerFiltrePaiements()">
                       <option value="">— Tous les statuts —</option>
-                      <option value="EN_ATTENTE">⏳ En attente</option>
-                      <option value="VALIDE">✓ Validé</option>
-                      <option value="REJETE">✗ Rejeté</option>
+                      <option [value]="StatutPayment.EN_ATTENTE_PREUVE">🕒 En attente de preuve</option>
+                      <option [value]="StatutPayment.EN_VERIFICATION">⏳ En vérification</option>
+                      <option [value]="StatutPayment.VALIDE">✓ Validé</option>
+                      <option [value]="StatutPayment.REJETE">✗ Rejeté</option>
                     </select>
                   </div>
                   <div class="col-md-4">
@@ -364,7 +365,7 @@
                       </thead>
                       <tbody>
                         @for (paiement of paiementsPaginees; track paiement.id) {
-                          <tr [class.table-warning]="paiement.statut === 'EN_ATTENTE'">
+                          <tr [class.table-warning]="paiement.statut === StatutPayment.EN_VERIFICATION">
                             <td>
                               <strong>{{ paiement.clientPrenom }} {{ paiement.clientNom }}</strong>
                               <br />
@@ -392,7 +393,7 @@
                               <small>{{ formatDate(paiement.dateCreation) }}</small>
                             </td>
                             <td>
-                              @if (paiement.statut === 'EN_ATTENTE') {
+                              @if (paiement.statut === StatutPayment.EN_VERIFICATION) {
                                 <button
                                   type="button"
                                   class="btn btn-sm btn-success me-2"
@@ -485,7 +486,7 @@
                       </thead>
                       <tbody>
                         @for (booking of reservationsFiltrees; track booking.id) {
-                          @if (booking.statut === 'DEMANDE_ANNULATION' || booking.statut === 'ANNULATION_DEMANDEE') {
+                          @if (booking.statut === StatutBooking.DEMANDE_ANNULATION) {
                             <tr class="table-warning">
                               <td>
                                 <strong>{{ booking.userNomComplet || 'Client inconnu' }}</strong>

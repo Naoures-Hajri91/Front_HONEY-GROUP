@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { StatutPayment } from '../models/role';
 
 export interface Payment {
   id: number;
@@ -11,7 +12,7 @@ export interface Payment {
   clientEmail: string;
   montant: number;
   typePayment?: string;
-  statut: 'EN_ATTENTE' | 'VALIDE' | 'REJETE';
+  statut: StatutPayment;
   dateCreation: string;
   dateValidation?: string;
   lienPreuve?: string;
