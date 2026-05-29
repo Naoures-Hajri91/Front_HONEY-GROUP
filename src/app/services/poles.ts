@@ -6,7 +6,7 @@ import {Observable} from 'rxjs';
   providedIn: 'root',
 })
 export class Poles {
-  private apiUrl = 'http://localhost:8080/api/poles';
+  private apiUrl = 'https://api.honeygroupitmada.com/api/poles';
 
   constructor(private http: HttpClient) {}
 

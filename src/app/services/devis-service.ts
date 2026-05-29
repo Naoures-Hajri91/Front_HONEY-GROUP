@@ -6,7 +6,7 @@ import {Observable} from 'rxjs';
   providedIn: 'root',
 })
 export class DevisService {
-  private apiUrl = 'http://localhost:8080/api/leads';
+  private apiUrl = 'https://api.honeygroupitmada.com/api/leads';
 
   constructor(private http: HttpClient) {}
 

@@ -8,8 +8,8 @@ import {Observable} from 'rxjs';
 export class Auth {
   private http = inject(HttpClient);
 
-  private apiUrl = 'http://localhost:8080/api/auth';
-  private apiAuth = 'http://localhost:8080/api/users';
+  private apiUrl = 'https://api.honeygroupitmada.com/api/auth';
+  private apiAuth = 'https://api.honeygroupitmada.com/api/users';
 
   register(data: any) {
     return this.http.post(`${this.apiUrl}/register`, data);
