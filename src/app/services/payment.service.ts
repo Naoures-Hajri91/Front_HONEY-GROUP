@@ -27,7 +27,7 @@ export interface Payment {
 })
 export class PaymentService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:8080/api/payments';
+  private apiUrl = 'https://api.honeygroupitmada.com/api/payments';
 
   /**
    * Récupère tous les paiements (STAFF ONLY)

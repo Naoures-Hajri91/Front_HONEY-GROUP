@@ -40,7 +40,7 @@ export interface BookingRequest {
 })
 export class TourismeService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:8080/api';
+  private apiUrl = 'https://api.honeygroupitmada.com/api';
 
   getPrestations(): Observable<Prestation[]> {
     return this.http

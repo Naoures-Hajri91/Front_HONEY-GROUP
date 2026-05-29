@@ -8,7 +8,7 @@ import { Booking } from '../models/booking';
 })
 export class BookingService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:8080/api/bookings';
+  private apiUrl = 'https://api.honeygroupitmada.com/api/bookings';
 
   /**
    * VUE CLIENT : Récupère l'historique des réservations de l'utilisateur actuel
