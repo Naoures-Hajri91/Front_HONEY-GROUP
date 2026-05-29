@@ -1,9 +1,16 @@
 <div class="bg-light border-bottom py-4 mb-4">
   <div class="container">
-    <h1 class="h3 fw-bold mb-1">Mon compte</h1>
-    @if (profil) {
-      <p class="text-muted mb-0">{{ profil.prenom }} {{ profil.nom }} · {{ profil.email }}</p>
-    }
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <h1 class="h3 fw-bold mb-1">Mon compte</h1>
+        @if (profil) {
+          <p class="text-muted mb-0">{{ profil.prenom }} {{ profil.nom }} · {{ profil.email }}</p>
+        }
+      </div>
+      <span class="badge" [ngClass]="userRole === Role.CLIENT ? 'bg-success' : 'bg-primary'">
+        Espace {{ userRole }}
+      </span>
+    </div>
   </div>
 </div>
 
@@ -30,6 +37,7 @@
       </button>
     </li>
   </ul>
+  <hr class="my-5">
 
   @if (chargementProfil) {
     <div class="text-center py-5 text-muted">
@@ -87,12 +95,13 @@
       </div>
 
       <div class="col-lg-4">
-        <div class="card border-0 shadow-sm">
+        <!-- Section Mot de passe (Commune) -->
+        <div class="card border-0 shadow-sm mb-4">
           <div class="card-body p-4">
             <h2 class="h5 fw-bold mb-3">Mot de passe</h2>
             <p class="text-muted small">
               Pour changer votre mot de passe, nous vous envoyons un lien sécurisé par e-mail
-              (procédure « mot de passe oublié »).
+              (procédure "mot de passe oublié").
             </p>
             <button
               type="button"
@@ -100,160 +109,436 @@
               [disabled]="envoiResetMdp"
               (click)="demanderReinitialisationMotDePasse()"
             >
-              @if (envoiResetMdp) {
-                Envoi en cours…
-              } @else {
-                Recevoir un lien de réinitialisation
-              }
+              {{ envoiResetMdp ? 'Envoi en cours…' : 'Recevoir un lien de réinitialisation' }}
             </button>
           </div>
         </div>
-      </div>
-    </div>
-  } @else {
-    <div class="card border-0 shadow-sm">
-      <div class="card-body p-4">
-        <h2 class="h5 fw-bold mb-3">Historique de réservations</h2>
 
-        @if (chargementReservations) {
-          <div class="text-center py-4 text-muted">
-            <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-            <span class="ms-2">Chargement…</span>
-          </div>
-        } @else if (reservations.length === 0) {
-          <p class="text-muted mb-3">Vous n’avez pas encore de réservation.</p>
-          <a routerLink="/tourisme/catalogue" class="btn btn-primary btn-sm">Explorer le catalogue</a>
-        } @else {
-          <div class="row g-2 mb-4 align-items-end bg-light p-3 rounded-3">
-            <div class="col-md-4">
-              <label class="form-label small fw-bold mb-1">Destination / prestation</label>
-              <input
-                type="text"
-                class="form-control form-control-sm"
-                placeholder="Ex. Trek, Nosy Be…"
-                [(ngModel)]="filtreDestination"
-                (input)="appliquerFiltresReservations()"
-              />
-            </div>
-            <div class="col-md-2">
-              <label class="form-label small fw-bold mb-1">Date du</label>
-              <input
-                type="date"
-                class="form-control form-control-sm"
-                [(ngModel)]="filtreDateDebut"
-                (change)="appliquerFiltresReservations()"
-              />
-            </div>
-            <div class="col-md-2">
-              <label class="form-label small fw-bold mb-1">Date au</label>
-              <input
-                type="date"
-                class="form-control form-control-sm"
-                [(ngModel)]="filtreDateFin"
-                (change)="appliquerFiltresReservations()"
-              />
-            </div>
-            <div class="col-md-2">
-              <label class="form-label small fw-bold mb-1">Montant min. (€)</label>
-              <input
-                type="number"
-                class="form-control form-control-sm"
-                min="0"
-                [(ngModel)]="filtreMontantMin"
-                (input)="appliquerFiltresReservations()"
-              />
-            </div>
-            <div class="col-md-2">
-              <label class="form-label small fw-bold mb-1">Montant max. (€)</label>
-              <input
-                type="number"
-                class="form-control form-control-sm"
-                min="0"
-                [(ngModel)]="filtreMontantMax"
-                (input)="appliquerFiltresReservations()"
-              />
-            </div>
-            <div class="col-12 d-flex justify-content-between align-items-center">
-              <small class="text-muted">{{ reservationsFiltrees.length }} réservation(s) affichée(s)</small>
-              <button type="button" class="btn btn-sm btn-outline-secondary" (click)="reinitialiserFiltresReservations()">
-                Réinitialiser les filtres
+        <!-- SECTION STAFF : Rappel des droits dans l'onglet Infos -->
+        @if (userRole === Role.MANAGER || userRole === Role.ADMIN) {
+          <div class="card border-primary shadow-sm">
+            <div class="card-body p-4">
+              <h2 class="h5 fw-bold mb-3 text-primary">Accès Staff</h2>
+              <p class="small text-muted">Vous disposez de privilèges étendus pour la gestion des réservations et des paiements.</p>
+              <button class="btn btn-primary btn-sm w-100" (click)="changerOnglet('dashboard')">
+                Aller au tableau de bord
               </button>
             </div>
           </div>
-
-          @if (reservationsFiltrees.length === 0) {
-            <p class="text-muted text-center py-4 mb-0">Aucune réservation ne correspond à vos critères.</p>
-          } @else {
-          <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-              <thead class="table-light">
-                <tr>
-                  <th>Prestation</th>
-                  <th>Dates</th>
-                  <th>Participants</th>
-                  <th>Montant</th>
-                  <th>Statut</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (resa of reservationsPaginees; track resa.id) {
-                  <tr>
-                    <td>
-                      <strong>{{ resa.prestationTitre || '—' }}</strong>
-                      @if (resa.poleNom) {
-                        <br /><small class="text-muted">{{ resa.poleNom }}</small>
-                      }
-                    </td>
-                    <td>
-                      <small>
-                        {{ formatDate(resa.dateDebutSession) }}
-                        @if (resa.dateFinSession) {
-                          <br />→ {{ formatDate(resa.dateFinSession) }}
-                        }
-                      </small>
-                    </td>
-                    <td>{{ resa.nbPersonnes ?? '—' }}</td>
-                    <td class="fw-semibold">{{ formatMontant(resa.montantTotal) }}</td>
-                    <td>
-                      <span class="badge bg-secondary-subtle text-secondary">{{ resa.statut || '—' }}</span>
-                    </td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          </div>
-
-          @if (reservationsFiltrees.length > itemsParPageReservations) {
-            <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
-              <div class="text-muted small">
-                Affichage {{ (pageReservations - 1) * itemsParPageReservations + 1 }} à
-                {{ Math.min(pageReservations * itemsParPageReservations, reservationsFiltrees.length) }}
-                sur {{ reservationsFiltrees.length }} réservation(s)
-              </div>
-              <div>
-                <button
-                  type="button"
-                  class="btn btn-sm btn-outline-primary"
-                  [disabled]="pageReservations === 1"
-                  (click)="pageReservations = pageReservations - 1"
-                >
-                  <i class="bi bi-chevron-left"></i> Précédent
-                </button>
-                <span class="px-3 small">Page {{ pageReservations }} / {{ totalPagesReservations }}</span>
-                <button
-                  type="button"
-                  class="btn btn-sm btn-outline-primary"
-                  [disabled]="pageReservations >= totalPagesReservations"
-                  (click)="pageReservations = pageReservations + 1"
-                >
-                  Suivant <i class="bi bi-chevron-right"></i>
-                </button>
-              </div>
-            </div>
-          }
-          }
         }
       </div>
     </div>
+
+  } @else if (ongletActif === 'dashboard') {
+    <!-- ================== VUE DYNAMIQUE SELON LE RÔLE ================== -->
+    
+    @if (userRole === Role.CLIENT) {
+      <!-- ================== VUE CLIENT ================== -->
+      <div class="row g-4">
+        <div class="col-lg-8">
+          <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+              <h2 class="h5 fw-bold mb-3">Historique de réservations</h2>
+
+              @if (chargementReservations) {
+                <div class="text-center py-4 text-muted">
+                  <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                  <span class="ms-2">Chargement…</span>
+                </div>
+              } @else if (reservations.length === 0) {
+                <p class="text-muted mb-3">Vous n'avez pas encore de réservation.</p>
+                <a routerLink="/tourisme/catalogue" class="btn btn-primary btn-sm">Explorer le catalogue</a>
+              } @else {
+                <div class="row g-2 mb-4 align-items-end bg-light p-3 rounded-3">
+                  <div class="col-md-4">
+                    <label class="form-label small fw-bold mb-1">Destination / prestation</label>
+                    <input
+                      type="text"
+                      class="form-control form-control-sm"
+                      placeholder="Ex. Trek, Nosy Be…"
+                      [(ngModel)]="filtreDestination"
+                      (input)="appliquerFiltresReservations()"
+                    />
+                  </div>
+                  <div class="col-md-2">
+                    <label class="form-label small fw-bold mb-1">Date du</label>
+                    <input
+                      type="date"
+                      class="form-control form-control-sm"
+                      [(ngModel)]="filtreDateDebut"
+                      (change)="appliquerFiltresReservations()"
+                    />
+                  </div>
+                  <div class="col-md-2">
+                    <label class="form-label small fw-bold mb-1">Date au</label>
+                    <input
+                      type="date"
+                      class="form-control form-control-sm"
+                      [(ngModel)]="filtreDateFin"
+                      (change)="appliquerFiltresReservations()"
+                    />
+                  </div>
+                  <div class="col-md-2">
+                    <label class="form-label small fw-bold mb-1">Montant min. (€)</label>
+                    <input
+                      type="number"
+                      class="form-control form-control-sm"
+                      min="0"
+                      [(ngModel)]="filtreMontantMin"
+                      (input)="appliquerFiltresReservations()"
+                    />
+                  </div>
+                  <div class="col-md-2">
+                    <label class="form-label small fw-bold mb-1">Montant max. (€)</label>
+                    <input
+                      type="number"
+                      class="form-control form-control-sm"
+                      min="0"
+                      [(ngModel)]="filtreMontantMax"
+                      (input)="appliquerFiltresReservations()"
+                    />
+                  </div>
+                  <div class="col-12 d-flex justify-content-between align-items-center">
+                    <small class="text-muted">{{ reservationsFiltrees.length }} réservation(s) affichée(s)</small>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" (click)="reinitialiserFiltresReservations()">
+                      Réinitialiser les filtres
+                    </button>
+                  </div>
+                </div>
+
+                @if (reservationsFiltrees.length === 0) {
+                  <p class="text-muted text-center py-4 mb-0">Aucune réservation ne correspond à vos critères.</p>
+                } @else {
+                  <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                      <thead class="table-light">
+                        <tr>
+                          <th>Prestation</th>
+                          <th>Dates</th>
+                          <th>Participants</th>
+                          <th>Montant</th>
+                          <th>Statut</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (resa of reservationsPaginees; track resa.id) {
+                          <tr>
+                            <td>
+                              <strong>{{ resa.prestationTitre || '—' }}</strong>
+                              @if (resa.poleNom) {
+                                <br /><small class="text-muted">{{ resa.poleNom }}</small>
+                              }
+                            </td>
+                            <td>
+                              <small>
+                                {{ formatDate(resa.dateDebutSession) }}
+                                @if (resa.dateFinSession) {
+                                  <br />→ {{ formatDate(resa.dateFinSession) }}
+                                }
+                              </small>
+                            </td>
+                            <td>{{ resa.nbPersonnes ?? '—' }}</td>
+                            <td class="fw-semibold">{{ formatMontant(resa.montantTotal) }}</td>
+                            <td>
+                              <span class="badge bg-secondary-subtle text-secondary">{{ resa.statut || '—' }}</span>
+                            </td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+
+                  @if (reservationsFiltrees.length > itemsParPageReservations) {
+                    <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                      <div class="text-muted small">
+                        Affichage {{ (pageReservations - 1) * itemsParPageReservations + 1 }} à
+                        {{ Math.min(pageReservations * itemsParPageReservations, reservationsFiltrees.length) }}
+                        sur {{ reservationsFiltrees.length }} réservation(s)
+                      </div>
+                      <div>
+                        <button
+                          type="button"
+                          class="btn btn-sm btn-outline-primary"
+                          [disabled]="pageReservations === 1"
+                          (click)="pageReservations = pageReservations - 1"
+                        >
+                          <i class="bi bi-chevron-left"></i> Précédent
+                        </button>
+                        <span class="px-3 small">Page {{ pageReservations }} / {{ totalPagesReservations }}</span>
+                        <button
+                          type="button"
+                          class="btn btn-sm btn-outline-primary"
+                          [disabled]="pageReservations >= totalPagesReservations"
+                          (click)="pageReservations = pageReservations + 1"
+                        >
+                          Suivant <i class="bi bi-chevron-right"></i>
+                        </button>
+                      </div>
+                    </div>
+                  }
+                }
+              }
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="card border-warning mb-4 h-100">
+            <div class="card-body">
+              <h6>Demandes d'annulation</h6>
+              <p class="small">Approuver ou rejeter les demandes de remboursement.</p>
+              <button class="btn btn-warning btn-sm">Gérer les annulations</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    } @else if (userRole === Role.MANAGER || userRole === Role.ADMIN) {
+      <!-- ================== VUE STAFF (MANAGER/ADMIN) ================== -->
+      <div class="row g-4">
+        <!-- PANNEAU 1 : VALIDATION DES PAIEMENTS -->
+        <div class="col-12">
+          <div class="card border-0 shadow-sm">
+            <div class="card-header bg-primary bg-opacity-10 border-bottom">
+              <h2 class="h5 fw-bold mb-0 text-primary">
+                <i class="bi bi-cash-coin me-2"></i> Validation des paiements
+              </h2>
+            </div>
+            <div class="card-body p-4">
+              @if (chargementPaiements) {
+                <div class="text-center py-5">
+                  <div class="spinner-border text-primary" role="status"></div>
+                  <p class="mt-3 text-muted">Chargement des paiements…</p>
+                </div>
+              } @else if (paiements.length === 0) {
+                <p class="text-muted text-center py-4">Aucun paiement à traiter.</p>
+              } @else {
+                <!-- Filtres de paiement -->
+                <div class="row g-2 mb-4 bg-light p-3 rounded-3">
+                  <div class="col-md-4">
+                    <label class="form-label small fw-bold mb-1">Client</label>
+                    <input
+                      type="text"
+                      class="form-control form-control-sm"
+                      placeholder="Nom ou email…"
+                      [(ngModel)]="filtrePaiementClient"
+                      (input)="appliquerFiltrePaiements()"
+                    />
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label small fw-bold mb-1">Statut</label>
+                    <select class="form-select form-select-sm" [(ngModel)]="filtrePaiementStatut" (change)="appliquerFiltrePaiements()">
+                      <option value="">— Tous les statuts —</option>
+                      <option value="EN_ATTENTE">⏳ En attente</option>
+                      <option value="VALIDE">✓ Validé</option>
+                      <option value="REJETE">✗ Rejeté</option>
+                    </select>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label small fw-bold mb-1">&nbsp;</label>
+                    <button type="button" class="btn btn-sm btn-outline-secondary w-100" (click)="filtrePaiementClient = ''; filtrePaiementStatut = ''; appliquerFiltrePaiements()">
+                      Réinitialiser
+                    </button>
+                  </div>
+                  <div class="col-12">
+                    <small class="text-muted">{{ paiementsFiltres.length }} paiement(s)</small>
+                  </div>
+                </div>
+
+                <!-- Tableau des paiements -->
+                @if (paiementsFiltres.length === 0) {
+                  <p class="text-muted text-center py-4">Aucun paiement ne correspond aux critères.</p>
+                } @else {
+                  <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                      <thead class="table-light">
+                        <tr>
+                          <th>Client</th>
+                          <th>Montant</th>
+                          <th>Type</th>
+                          <th>Statut</th>
+                          <th>Preuve</th>
+                          <th>Créé le</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (paiement of paiementsPaginees; track paiement.id) {
+                          <tr [class.table-warning]="paiement.statut === 'EN_ATTENTE'">
+                            <td>
+                              <strong>{{ paiement.clientPrenom }} {{ paiement.clientNom }}</strong>
+                              <br />
+                              <small class="text-muted">{{ paiement.clientEmail }}</small>
+                            </td>
+                            <td class="fw-semibold">{{ formatMontant(paiement.montant) }}</td>
+                            <td>
+                              <span class="badge bg-info-subtle text-info">{{ paiement.typePayment || 'N/A' }}</span>
+                            </td>
+                            <td>
+                              <span [class]="'badge ' + obtenirCouleurStatutPaiement(paiement.statut)">
+                                {{ obtenirLibelleStatutPaiement(paiement.statut) }}
+                              </span>
+                            </td>
+                            <td>
+                              @if (paiement.lienPreuve) {
+                                <a [href]="paiement.lienPreuve" target="_blank" class="btn btn-sm btn-outline-info">
+                                  <i class="bi bi-file-earmark-pdf"></i>
+                                </a>
+                              } @else {
+                                <span class="text-muted small">—</span>
+                              }
+                            </td>
+                            <td>
+                              <small>{{ formatDate(paiement.dateCreation) }}</small>
+                            </td>
+                            <td>
+                              @if (paiement.statut === 'EN_ATTENTE') {
+                                <button
+                                  type="button"
+                                  class="btn btn-sm btn-success me-2"
+                                  (click)="validerPaiement(paiement)"
+                                  title="Valider ce paiement"
+                                >
+                                  <i class="bi bi-check-circle"></i>
+                                </button>
+                                <button
+                                  type="button"
+                                  class="btn btn-sm btn-danger"
+                                  (click)="rejeterPaiement(paiement)"
+                                  title="Rejeter ce paiement"
+                                >
+                                  <i class="bi bi-x-circle"></i>
+                                </button>
+                              } @else {
+                                <span class="text-muted small">Traité</span>
+                              }
+                            </td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+
+                  @if (paiementsFiltres.length > itemsParPagePaiements) {
+                    <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                      <div class="text-muted small">
+                        Affichage {{ (pagePaiements - 1) * itemsParPagePaiements + 1 }} à
+                        {{ Math.min(pagePaiements * itemsParPagePaiements, paiementsFiltres.length) }}
+                        sur {{ paiementsFiltres.length }} paiement(s)
+                      </div>
+                      <div>
+                        <button
+                          type="button"
+                          class="btn btn-sm btn-outline-primary"
+                          [disabled]="pagePaiements === 1"
+                          (click)="pagePaiements = pagePaiements - 1"
+                        >
+                          <i class="bi bi-chevron-left"></i> Précédent
+                        </button>
+                        <span class="px-3 small">Page {{ pagePaiements }} / {{ totalPagesPaiements }}</span>
+                        <button
+                          type="button"
+                          class="btn btn-sm btn-outline-primary"
+                          [disabled]="pagePaiements >= totalPagesPaiements"
+                          (click)="pagePaiements = pagePaiements + 1"
+                        >
+                          Suivant <i class="bi bi-chevron-right"></i>
+                        </button>
+                      </div>
+                    </div>
+                  }
+                }
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- PANNEAU 2 : DEMANDES D'ANNULATION -->
+        <div class="col-12">
+          <div class="card border-0 shadow-sm">
+            <div class="card-header bg-warning bg-opacity-10 border-bottom">
+              <h2 class="h5 fw-bold mb-0 text-warning">
+                <i class="bi bi-x-circle me-2"></i> Demandes d'annulation en attente
+              </h2>
+            </div>
+            <div class="card-body p-4">
+              @if (chargementReservations) {
+                <div class="text-center py-5">
+                  <div class="spinner-border text-warning" role="status"></div>
+                  <p class="mt-3 text-muted">Chargement des demandes…</p>
+                </div>
+              } @else {
+                @if (reservations.length === 0) {
+                  <p class="text-muted text-center py-4">Aucune demande d'annulation en cours.</p>
+                } @else {
+                  <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                      <thead class="table-light">
+                        <tr>
+                          <th>Client</th>
+                          <th>Réservation</th>
+                          <th>Montant</th>
+                          <th>Dates</th>
+                          <th>Statut</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (booking of reservationsFiltrees; track booking.id) {
+                          @if (booking.statut === 'DEMANDE_ANNULATION' || booking.statut === 'ANNULATION_DEMANDEE') {
+                            <tr class="table-warning">
+                              <td>
+                                <strong>{{ booking.userNomComplet || 'Client inconnu' }}</strong>
+                              </td>
+                              <td>
+                                {{ booking.prestationTitre || 'N/A' }}
+                                @if (booking.poleNom) {
+                                  <br />
+                                  <small class="text-muted">{{ booking.poleNom }}</small>
+                                }
+                              </td>
+                              <td class="fw-semibold">{{ formatMontant(booking.montantTotal) }}</td>
+                              <td>
+                                <small>
+                                  {{ formatDate(booking.dateDebutSession) }}
+                                  @if (booking.dateFinSession) {
+                                    <br />→ {{ formatDate(booking.dateFinSession) }}
+                                  }
+                                </small>
+                              </td>
+                              <td>
+                                <span class="badge bg-warning-subtle text-warning">Demande en cours</span>
+                              </td>
+                              <td>
+                                <button
+                                  type="button"
+                                  class="btn btn-sm btn-success me-2"
+                                  (click)="approuverAnnulation(booking)"
+                                  title="Approuver l'annulation"
+                                >
+                                  <i class="bi bi-check-circle"></i> Approuver
+                                </button>
+                                <button
+                                  type="button"
+                                  class="btn btn-sm btn-secondary"
+                                  (click)="toastr.info('Refus non implémenté pour le moment')"
+                                  title="Refuser l'annulation"
+                                >
+                                  <i class="bi bi-x-circle"></i> Refuser
+                                </button>
+                              </td>
+                            </tr>
+                          }
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                }
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    }
   }
 </div>

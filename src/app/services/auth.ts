@@ -1,6 +1,6 @@
-import {inject, Injectable} from '@angular/core';
+import {inject, Injectable, signal} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
-import {Observable} from 'rxjs';
+import {Observable, tap} from 'rxjs';
 import { ProfileUpdatePayload, UserProfile } from '../models/user-profile';
 
 @Injectable({
@@ -11,6 +11,9 @@ export class Auth {
 
   private apiUrl = 'http://localhost:8080/api/auth';
   private apiAuth = 'http://localhost:8080/api/users';
+
+  // Signal pour accéder au profil n'importe où sans refaire d'appel HTTP
+  currentUser = signal<UserProfile | null>(null);
 
   register(data: any) {
     return this.http.post(`${this.apiUrl}/register`, data);
@@ -30,7 +33,9 @@ export class Auth {
 
   // ✅ CURRENT USER
   getCurrentUser(): Observable<UserProfile> {
-    return this.http.get<UserProfile>(`${this.apiAuth}/me`);
+    return this.http.get<UserProfile>(`${this.apiAuth}/me`).pipe(
+      tap(user => this.currentUser.set(user))
+    );
   }
 
   updateProfile(payload: ProfileUpdatePayload): Observable<UserProfile> {
